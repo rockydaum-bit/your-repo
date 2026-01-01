@@ -10,6 +10,11 @@
         "sha256":  "1209F7FA05271A58888EC5906F868E6851448E3DB88E426A9E597436ACEE007A"
     },
     {
+        "path":  ".github/CODEOWNERS",
+        "size":  510,
+        "sha256":  "A1558942EC4162E29CE4B97C0317989A4E2B4097AD03EA32D977502193F033FC"
+    },
+    {
         "path":  ".github/PULL_REQUEST_TEMPLATE/pr_template.md",
         "size":  5500,
         "sha256":  "D12D143E4727CC09285647A2641462B375D93E1997B3629787AE675C4EB5BB82"
@@ -26,13 +31,18 @@
     },
     {
         "path":  ".github/workflows/ci.yml",
-        "size":  1554,
-        "sha256":  "B3EB42FABF531285B5E5A92C82DB46DCB9E34972DB815E605F7964A4724DF9C1"
+        "size":  2664,
+        "sha256":  "B8E62F7046D7E004964D3EAD5037418D409698ED5A1AE04AEA36C900D9814329"
     },
     {
         "path":  ".github/workflows/coverage-ratchet.yml",
         "size":  2017,
         "sha256":  "B081AE054B0F1A0F5FC886854D420F217CEC0CD81EE4E8D7CA59755B28060DB1"
+    },
+    {
+        "path":  ".github/workflows/inventory-manual.yml",
+        "size":  588,
+        "sha256":  "919A02DA8ECE58C656E3CC61B5FD283EBE0800D87C4B250566CDB01BF93AB6FB"
     },
     {
         "path":  "CONTRIBUTING.md",
@@ -41,8 +51,8 @@
     },
     {
         "path":  "README.md",
-        "size":  3533,
-        "sha256":  "3B08F1B0D875304DD61BAA58E0432E150B8F85E3F643FF3DE02CB65B70E7861F"
+        "size":  6146,
+        "sha256":  "DA2726D52D1C9E18408256625B44BABD03AAEB7E06753989E77B79BA358A562B"
     },
     {
         "path":  "agents/__init__.py",
@@ -356,8 +366,8 @@
     },
     {
         "path":  "scripts/commit_and_verify_inventory.ps1",
-        "size":  886,
-        "sha256":  "8F37B4DD52E2561CD5DCEB6210A9444C1932B539287A6748A6E140C002088886"
+        "size":  1424,
+        "sha256":  "77EA02AE25BBD405DC6CB35409C427E1E275FBF7E3630FC5FDC06376EC3F4408"
     },
     {
         "path":  "scripts/commit_repo_inventory.ps1",
