@@ -6,7 +6,6 @@ so tests can run on platforms where a binary wheel is not available (e.g., Pytho
 on Windows). These classes are intentionally minimal — they implement basic
 container behaviour and are sufficient for import-time usage in our test suite.
 """
-from collections import UserDict, UserList
 
 
 class HashTrieMap(dict):

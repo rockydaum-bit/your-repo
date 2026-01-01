@@ -5,11 +5,9 @@ import glob
 import time
 
 import pytest
-import sys
 
 from utils.json_validate import load_json, validate_json_against_schema
 import threading
-import subprocess
 import hashlib
 
 
@@ -18,7 +16,9 @@ class StubOpenAIClient:
         self.api_key = api_key
         self.model = model
 
-    def run_json(self, system_prompt: str, user_prompt: str, input_payload: dict) -> dict:
+    def run_json(
+        self, system_prompt: str, user_prompt: str, input_payload: dict
+    ) -> dict:
         # Simulate failure for plan generation (payload includes 'brief')
         if isinstance(input_payload, dict) and "brief" in input_payload:
             raise RuntimeError("Error code: 401 - {'error': 'mock invalid api key'}")
@@ -36,30 +36,51 @@ def write_minimal_prompts(root: str) -> None:
     os.makedirs(schemas_dir, exist_ok=True)
 
     # Minimal system and task prompts required by agents
-    with open(os.path.join(sys_dir, "content_generation_system.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(sys_dir, "content_generation_system.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("content generation system")
-    with open(os.path.join(tasks_dir, "script_generation.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(tasks_dir, "script_generation.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("script generation task")
-    with open(os.path.join(sys_dir, "av_production_system.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(sys_dir, "av_production_system.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("av production system")
-    with open(os.path.join(tasks_dir, "storyboard_shotlist.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(tasks_dir, "storyboard_shotlist.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("storyboard task")
-    with open(os.path.join(sys_dir, "voice_synthesis_system.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(sys_dir, "voice_synthesis_system.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("voice synthesis system")
     with open(os.path.join(tasks_dir, "tts_directive.txt"), "w", encoding="utf-8") as f:
         f.write("tts directive task")
 
     # Copy canonical schemas from repository prompts to the test engine_root so agent validators can load them
     repo_schemas = os.path.join(os.getcwd(), "prompts", "schemas")
-    for fname in ("content_plan.schema.json", "script.schema.json", "storyboard.schema.json", "metadata.schema.json"):
+    for fname in (
+        "content_plan.schema.json",
+        "script.schema.json",
+        "storyboard.schema.json",
+        "metadata.schema.json",
+    ):
         src = os.path.join(repo_schemas, fname)
         dst = os.path.join(schemas_dir, fname)
         try:
-            with open(src, "r", encoding="utf-8") as rf, open(dst, "w", encoding="utf-8") as wf:
+            with (
+                open(src, "r", encoding="utf-8") as rf,
+                open(dst, "w", encoding="utf-8") as wf,
+            ):
                 wf.write(rf.read())
         except FileNotFoundError:
             # Fallback: create a permissive object schema if repo schema not present
-            permissive = {"$schema": "http://json-schema.org/draft/2020-12/schema", "type": "object"}
+            permissive = {
+                "$schema": "http://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+            }
             with open(dst, "w", encoding="utf-8") as wf:
                 json.dump(permissive, wf)
 
@@ -68,11 +89,10 @@ def write_brief(root: str, channel: str) -> None:
     brief_dir = os.path.join(root, "assets", "channels", channel, "pipeline", "briefs")
     os.makedirs(brief_dir, exist_ok=True)
     brief = {"channel_id": channel, "video_seed": {"topic": "test"}}
-    with open(os.path.join(brief_dir, "video01_brief.json"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(brief_dir, "video01_brief.json"), "w", encoding="utf-8"
+    ) as f:
         json.dump(brief, f)
-
-
-import pytest
 
 
 @pytest.mark.acceptance
@@ -87,10 +107,13 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
     # Prevent any subprocess from being spawned by mistake (tripwire)
     def _no_subprocess(*args, **kwargs):
         raise RuntimeError("subprocess.run disabled in acceptance tests")
+
     monkeypatch.setattr(subprocess, "run", _no_subprocess)
+
     # Also block direct Popen usage
     def _no_popen(*args, **kwargs):
         raise RuntimeError("subprocess.Popen disabled in acceptance tests")
+
     monkeypatch.setattr(subprocess, "Popen", _no_popen)
 
     # Ensure YouTube env vars are not set so OAuth paths are not reached
@@ -104,6 +127,7 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
     # Monkeypatch slow/remote helpers so test is fast and deterministic
     # 1) Hardware probe: remove psutil 1s interval
     from utils.hardware_monitor import HardwareStatus
+
     # Insert a lightweight `openai` shim into sys.modules to avoid importing the
     # real `openai` package (which pulls in pydantic/pydantic_core binary wheels
     # that may not be available in the test environment). This prevents import
@@ -111,8 +135,10 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
     # test to monkeypatch `OpenAIJsonClient.run_json` below.
     import types as _types
     import sys as _sys
+
     if "openai" not in _sys.modules:
         fake_openai = _types.ModuleType("openai")
+
         # Minimal OpenAI constructor used by utils.openai_client.OpenAIJsonClient
         def _fake_openai_ctor(*a, **k):
             # Provide a `.chat.completions.create(...)` call signature that
@@ -120,21 +146,42 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
             # `OpenAIJsonClient.run_json` when not monkeypatched.
             class _Resp:
                 def __init__(self):
-                    self.choices = [ _types.SimpleNamespace(message=_types.SimpleNamespace(content="{}")) ]
+                    self.choices = [
+                        _types.SimpleNamespace(
+                            message=_types.SimpleNamespace(content="{}")
+                        )
+                    ]
+
             class _Completions:
                 @staticmethod
                 def create(*args, **kwargs):
                     return _Resp()
-            fake = _types.SimpleNamespace(chat=_types.SimpleNamespace(completions=_Completions()))
+
+            fake = _types.SimpleNamespace(
+                chat=_types.SimpleNamespace(completions=_Completions())
+            )
             return fake
+
         fake_openai.OpenAI = _fake_openai_ctor
         _sys.modules["openai"] = fake_openai
     import agents.orchestrator as orch
-    monkeypatch.setattr(orch, "check_hardware", lambda *a, **k: HardwareStatus(cpu_pct=1.0, disk_free_pct=50.0, should_pause=False, reasons=[]))
+
+    monkeypatch.setattr(
+        orch,
+        "check_hardware",
+        lambda *a, **k: HardwareStatus(
+            cpu_pct=1.0, disk_free_pct=50.0, should_pause=False, reasons=[]
+        ),
+    )
 
     # 2) Disable weekly optimization to avoid additional OpenAI calls
     import agents.optimization_scaling as opt
-    monkeypatch.setattr(opt.OptimizationScalingAgent, "run_weekly_optimization", lambda self, *a, **k: "skipped_in_tests")
+
+    monkeypatch.setattr(
+        opt.OptimizationScalingAgent,
+        "run_weekly_optimization",
+        lambda self, *a, **k: "skipped_in_tests",
+    )
 
     # 3) Patch OpenAIJsonClient.run_json to return deterministic fixtures per schema
     import utils.openai_client as oc
@@ -142,9 +189,11 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
 
     def fake_run_json(self, system_prompt, user_prompt, input_payload):
         fixtures_dir = os.path.join(os.getcwd(), "tests", "fixtures")
+
         def _load(name):
             with open(os.path.join(fixtures_dir, name), "r", encoding="utf-8") as f:
                 return _json.load(f)
+
         # Prefer explicit task discriminator
         if isinstance(input_payload, dict):
             task = input_payload.get("_task")
@@ -155,7 +204,20 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
             if task == "storyboard":
                 return _load("storyboard.json")
             if task == "tts":
-                return {"narration_chunks": [{"chunk_id": "c1", "text": "Hello", "pacing": "medium", "emphasis": [], "pauses_ms": [], "pronunciations": []}], "disclaimers": [], "missing_data": []}
+                return {
+                    "narration_chunks": [
+                        {
+                            "chunk_id": "c1",
+                            "text": "Hello",
+                            "pacing": "medium",
+                            "emphasis": [],
+                            "pauses_ms": [],
+                            "pronunciations": [],
+                        }
+                    ],
+                    "disclaimers": [],
+                    "missing_data": [],
+                }
 
         # Fallback heuristics (backwards compatibility)
         if isinstance(input_payload, dict) and "brief" in input_payload:
@@ -166,7 +228,20 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
             sp = (system_prompt or "") + " " + (user_prompt or "")
             sp = sp.lower()
             if "voice" in sp or "tts" in sp:
-                return {"narration_chunks": [{"chunk_id": "c1", "text": "Hello", "pacing": "medium", "emphasis": [], "pauses_ms": [], "pronunciations": []}], "disclaimers": [], "missing_data": []}
+                return {
+                    "narration_chunks": [
+                        {
+                            "chunk_id": "c1",
+                            "text": "Hello",
+                            "pacing": "medium",
+                            "emphasis": [],
+                            "pauses_ms": [],
+                            "pronunciations": [],
+                        }
+                    ],
+                    "disclaimers": [],
+                    "missing_data": [],
+                }
             return _load("storyboard.json")
 
         # Default: empty object
@@ -178,6 +253,7 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
 
     def run_with_timeout(fn, timeout_sec=10):
         exc = []
+
         def target():
             try:
                 fn()
@@ -208,7 +284,9 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
                 listing = f"<cannot list {parent}: {e}>"
             # emit visible diagnostic to pytest stdout
             print(f"DEBUG: missing artifact {path}; parent {parent} listing: {listing}")
-            raise FileNotFoundError(f"{path} not found; parent dir {parent} listing: {listing}")
+            raise FileNotFoundError(
+                f"{path} not found; parent dir {parent} listing: {listing}"
+            )
         with open(path, "rb") as f:
             for chunk in iter(lambda: f.read(1024 * 1024), b""):
                 h.update(chunk)
@@ -232,13 +310,19 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
 
     for i in range(2):
         # run the orchestrator directly (avoid argparse/sys.argv interference)
-        run_with_timeout(lambda: Orchestrator().run_weekly_growth_loop(), timeout_sec=10)
+        run_with_timeout(
+            lambda: Orchestrator().run_weekly_growth_loop(), timeout_sec=10
+        )
         # small pause to ensure timestamps differ (run_id uses second precision)
         time.sleep(1.1)
 
         # capture the most recent run summary and artifacts for this iteration
         runs_dir = os.path.join(engine_root, "data", "state", "runs")
-        runs_now = sorted([d for d in glob.glob(os.path.join(runs_dir, "*")) if os.path.isdir(d)], key=os.path.getmtime, reverse=True)
+        runs_now = sorted(
+            [d for d in glob.glob(os.path.join(runs_dir, "*")) if os.path.isdir(d)],
+            key=os.path.getmtime,
+            reverse=True,
+        )
         assert runs_now, "no runs produced"
         latest_run_dir = runs_now[0]
         sfn = os.path.join(latest_run_dir, "summary.json")
@@ -256,12 +340,17 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
 
     # Sanity: config should not enable YouTube in this test
     from config import get_config
+
     cfg = get_config()
     assert cfg.youtube is None
 
     # Gather runs (sanity)
     runs_dir = os.path.join(engine_root, "data", "state", "runs")
-    runs = sorted([d for d in glob.glob(os.path.join(runs_dir, "*")) if os.path.isdir(d)], key=os.path.getmtime, reverse=True)
+    runs = sorted(
+        [d for d in glob.glob(os.path.join(runs_dir, "*")) if os.path.isdir(d)],
+        key=os.path.getmtime,
+        reverse=True,
+    )
     assert len(runs) >= 2
 
     # Validate the two newest summaries against schema
@@ -282,17 +371,25 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
     for key in stable_keys:
         status = summary_run2["steps"].get(key)
         if status == "skipped":
-            assert hashes_run2[key] == hashes_run1[key], f"artifact {key} changed despite being skipped"
+            assert hashes_run2[key] == hashes_run1[key], (
+                f"artifact {key} changed despite being skipped"
+            )
         elif status == "success":
             # regenerated: ensure artifact exists and is valid JSON where applicable
-            assert key in artifacts_run2 and os.path.exists(artifacts_run2[key]), f"regenerated artifact {key} missing"
+            assert key in artifacts_run2 and os.path.exists(artifacts_run2[key]), (
+                f"regenerated artifact {key} missing"
+            )
         else:
-            raise AssertionError(f"unexpected step status for idempotency check: {status}")
+            raise AssertionError(
+                f"unexpected step status for idempotency check: {status}"
+            )
 
     # Behavioral: run #2 should mark core steps as skipped or success
     assert summary_run2 is not None
     for step in ["plan", "script", "storyboard", "metadata"]:
-        assert summary_run2["steps"][step] in ("skipped", "success"), f"step {step} not skipped/success in run2"
+        assert summary_run2["steps"][step] in ("skipped", "success"), (
+            f"step {step} not skipped/success in run2"
+        )
 
     # latest.json exists and points to most recent
     latest_path = os.path.join(runs_dir, "latest.json")
@@ -305,14 +402,16 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
     tmp_matches = []
     for root, _, files in os.walk(runs_dir):
         for f in files:
-            if ".tmp." in f or f.endswith('.tmp') or '.tmp' in f:
+            if ".tmp." in f or f.endswith(".tmp") or ".tmp" in f:
                 tmp_matches.append(os.path.join(root, f))
     assert not tmp_matches, f"found tmp files: {tmp_matches}"
 
     # Success-path assertions: core steps succeeded and no blocked_by_failed_dependency errors
     newest = summaries[0]
     for step in ["plan", "script", "tts", "storyboard", "metadata"]:
-        assert newest["steps"].get(step) in ("success", "skipped"), f"unexpected step status for {step}: {newest['steps'].get(step)}"
+        assert newest["steps"].get(step) in ("success", "skipped"), (
+            f"unexpected step status for {step}: {newest['steps'].get(step)}"
+        )
 
     # Do not assert absence of blocked_by_failed_dependency here; gating behavior
     # is covered by `test_dependency_gating_on_plan_failure`.
@@ -329,9 +428,12 @@ def test_dependency_gating_on_plan_failure(tmp_path, monkeypatch):
     # Tripwires for subprocess
     def _no_subprocess(*args, **kwargs):
         raise RuntimeError("subprocess.run disabled in acceptance tests")
+
     monkeypatch.setattr(subprocess, "run", _no_subprocess)
+
     def _no_popen(*args, **kwargs):
         raise RuntimeError("subprocess.Popen disabled in acceptance tests")
+
     monkeypatch.setattr(subprocess, "Popen", _no_popen)
 
     monkeypatch.delenv("YOUTUBE_CLIENT_SECRETS_PATH", raising=False)
@@ -341,28 +443,52 @@ def test_dependency_gating_on_plan_failure(tmp_path, monkeypatch):
     write_brief(engine_root, "channel_001_ai_tools")
 
     from utils.hardware_monitor import HardwareStatus
+
     # Ensure openai shim present as in the happy-path test to avoid pydantic_core import errors
     import types as _types
     import sys as _sys
+
     if "openai" not in _sys.modules:
         fake_openai = _types.ModuleType("openai")
+
         def _fake_openai_ctor(*a, **k):
             class _Resp:
                 def __init__(self):
-                    self.choices = [ _types.SimpleNamespace(message=_types.SimpleNamespace(content="{}")) ]
+                    self.choices = [
+                        _types.SimpleNamespace(
+                            message=_types.SimpleNamespace(content="{}")
+                        )
+                    ]
+
             class _Completions:
                 @staticmethod
                 def create(*args, **kwargs):
                     return _Resp()
-            fake = _types.SimpleNamespace(chat=_types.SimpleNamespace(completions=_Completions()))
+
+            fake = _types.SimpleNamespace(
+                chat=_types.SimpleNamespace(completions=_Completions())
+            )
             return fake
+
         fake_openai.OpenAI = _fake_openai_ctor
         _sys.modules["openai"] = fake_openai
     import agents.orchestrator as orch
-    monkeypatch.setattr(orch, "check_hardware", lambda *a, **k: HardwareStatus(cpu_pct=1.0, disk_free_pct=50.0, should_pause=False, reasons=[]))
+
+    monkeypatch.setattr(
+        orch,
+        "check_hardware",
+        lambda *a, **k: HardwareStatus(
+            cpu_pct=1.0, disk_free_pct=50.0, should_pause=False, reasons=[]
+        ),
+    )
 
     import agents.optimization_scaling as opt
-    monkeypatch.setattr(opt.OptimizationScalingAgent, "run_weekly_optimization", lambda self, *a, **k: "skipped_in_tests")
+
+    monkeypatch.setattr(
+        opt.OptimizationScalingAgent,
+        "run_weekly_optimization",
+        lambda self, *a, **k: "skipped_in_tests",
+    )
 
     import utils.openai_client as oc
 
@@ -382,6 +508,7 @@ def test_dependency_gating_on_plan_failure(tmp_path, monkeypatch):
 
     def run_with_timeout(fn, timeout_sec=10):
         exc = []
+
         def target():
             try:
                 fn()
@@ -400,7 +527,11 @@ def test_dependency_gating_on_plan_failure(tmp_path, monkeypatch):
     run_with_timeout(lambda: Orchestrator().run_weekly_growth_loop(), timeout_sec=10)
 
     runs_dir = os.path.join(engine_root, "data", "state", "runs")
-    runs = sorted([d for d in glob.glob(os.path.join(runs_dir, "*")) if os.path.isdir(d)], key=os.path.getmtime, reverse=True)
+    runs = sorted(
+        [d for d in glob.glob(os.path.join(runs_dir, "*")) if os.path.isdir(d)],
+        key=os.path.getmtime,
+        reverse=True,
+    )
     assert len(runs) >= 1
 
     schema = load_json(os.path.join("prompts", "schemas", "run_summary.schema.json"))
@@ -412,6 +543,10 @@ def test_dependency_gating_on_plan_failure(tmp_path, monkeypatch):
     assert data["steps"]["plan"] == "failed"
     assert data["steps"]["script"] == "skipped"
     blocked_found = any(
-        e.get("message") == "blocked_by_failed_dependency" for e in data.get("errors", []) if isinstance(e, dict)
+        e.get("message") == "blocked_by_failed_dependency"
+        for e in data.get("errors", [])
+        if isinstance(e, dict)
     )
-    assert blocked_found, f"blocked_by_failed_dependency not present in errors: {data.get('errors')}"
+    assert blocked_found, (
+        f"blocked_by_failed_dependency not present in errors: {data.get('errors')}"
+    )

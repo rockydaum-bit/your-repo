@@ -71,7 +71,16 @@ def insert_run_start(
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(run_id) DO NOTHING
             """,
-            (run_id, channel_id, mode, ts_now, None, json.dumps(meta or {}) if meta is not None else command, status, error_message),
+            (
+                run_id,
+                channel_id,
+                mode,
+                ts_now,
+                None,
+                json.dumps(meta or {}) if meta is not None else command,
+                status,
+                error_message,
+            ),
         )
         con.commit()
 
@@ -148,5 +157,7 @@ def list_recent_runs(
 
 
 # Backwards-compatible alias for previous name
-def fetch_recent_runs(db_path: Optional[str], channel_id: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+def fetch_recent_runs(
+    db_path: Optional[str], channel_id: Optional[str] = None, limit: int = 50
+) -> List[Dict[str, Any]]:
     return list_recent_runs(db_path, channel_id=channel_id, limit=limit)

@@ -2,8 +2,8 @@ import os
 import sqlite3
 from utils.db import init_db
 from utils.json_validate import save_json
-from utils.db import SCHEMA_SQL
 from datetime import datetime
+
 
 def preflight_check(cfg, paths, mode="run", channel_id=None):
     """Perform role-aware preflight checks.
@@ -16,9 +16,17 @@ def preflight_check(cfg, paths, mode="run", channel_id=None):
     warnings = []
     # Engine root
     if not os.path.isdir(cfg.engine_root):
-        errors.append(f"Engine root {cfg.engine_root} does not exist or is not a directory.")
+        errors.append(
+            f"Engine root {cfg.engine_root} does not exist or is not a directory."
+        )
     # Required dirs
-    for d in [paths.data_dir, paths.state_dir, paths.logs_dir, paths.root, os.path.join(cfg.engine_root, "assets")]:
+    for d in [
+        paths.data_dir,
+        paths.state_dir,
+        paths.logs_dir,
+        paths.root,
+        os.path.join(cfg.engine_root, "assets"),
+    ]:
         try:
             os.makedirs(d, exist_ok=True)
         except Exception as e:
@@ -31,7 +39,13 @@ def preflight_check(cfg, paths, mode="run", channel_id=None):
         con = sqlite3.connect(db_path)
         cur = con.cursor()
         # Check required tables
-        required = ["videos", "prompt_assignments", "analytics_daily", "orchestrator_events", "costs"]
+        required = [
+            "videos",
+            "prompt_assignments",
+            "analytics_daily",
+            "orchestrator_events",
+            "costs",
+        ]
         cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = set(r[0] for r in cur.fetchall())
         for t in required:
@@ -53,10 +67,18 @@ def preflight_check(cfg, paths, mode="run", channel_id=None):
     if mode == "run":
         yt = getattr(cfg, "youtube", None)
         if role == "brain":
-            if not yt or not getattr(yt, "client_secrets_path", None) or not getattr(yt, "token_path", None):
+            if (
+                not yt
+                or not getattr(yt, "client_secrets_path", None)
+                or not getattr(yt, "token_path", None)
+            ):
                 errors.append("YouTube client/token not configured for publish mode.")
         else:
-            if not yt or not getattr(yt, "client_secrets_path", None) or not getattr(yt, "token_path", None):
+            if (
+                not yt
+                or not getattr(yt, "client_secrets_path", None)
+                or not getattr(yt, "token_path", None)
+            ):
                 warnings.append("YouTube client/token not configured (worker).")
     # Budget/hardware (optional, soft fail)
     # ...
@@ -70,15 +92,33 @@ def preflight_check(cfg, paths, mode="run", channel_id=None):
         ts = datetime.utcnow().isoformat() + "Z"
         try:
             from utils.db import insert_orchestrator_event
-            insert_orchestrator_event(db_path, ts, "ERROR", "preflight_failed", {"errors": errors, "mode": mode, "channel_id": channel_id})
+
+            insert_orchestrator_event(
+                db_path,
+                ts,
+                "ERROR",
+                "preflight_failed",
+                {"errors": errors, "mode": mode, "channel_id": channel_id},
+            )
         except Exception:
             pass
         try:
             if channel_id:
-                out_dir = os.path.join(cfg.engine_root, "assets", "channels", channel_id, "pipeline", "ops")
+                out_dir = os.path.join(
+                    cfg.engine_root, "assets", "channels", channel_id, "pipeline", "ops"
+                )
                 os.makedirs(out_dir, exist_ok=True)
                 out_path = os.path.join(out_dir, "alerts.json")
-                save_json(out_path, {"last_alert_ts": ts, "severity": "error", "source": mode, "message": "; ".join(errors), "run_id": None})
+                save_json(
+                    out_path,
+                    {
+                        "last_alert_ts": ts,
+                        "severity": "error",
+                        "source": mode,
+                        "message": "; ".join(errors),
+                        "run_id": None,
+                    },
+                )
         except Exception:
             pass
         print("Preflight check failed:")

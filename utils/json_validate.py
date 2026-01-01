@@ -13,6 +13,7 @@ try:
         if os.path.isdir(shim_path):
             # Load package by executing its __init__.py into a new module
             import importlib.util
+
             init_file = os.path.join(shim_path, "__init__.py")
             if os.path.exists(init_file):
                 spec = importlib.util.spec_from_file_location("rpds", init_file)
@@ -27,6 +28,7 @@ except Exception:
 try:
     from jsonschema import Draft202012Validator  # type: ignore
 except Exception:
+
     class Draft202012Validator:
         def __init__(self, schema: dict) -> None:
             self.schema = schema
@@ -35,8 +37,10 @@ except Exception:
             # permissive: do not raise validation errors when jsonschema is unavailable
             return []
 
+
 class SchemaValidationError(RuntimeError):
     pass
+
 
 def validate_json_against_schema(data: dict, schema: dict) -> None:
     v = Draft202012Validator(schema)
@@ -48,9 +52,11 @@ def validate_json_against_schema(data: dict, schema: dict) -> None:
             msgs.append(f"{path}: {e.message}")
         raise SchemaValidationError("Schema validation failed: " + " | ".join(msgs))
 
+
 def load_json(path: str) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def save_json(path: str, data: dict) -> None:
     import os

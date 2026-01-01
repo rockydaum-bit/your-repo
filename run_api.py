@@ -6,8 +6,7 @@ point at a YAML file instead of relying on `ENGINE_CONFIG_PATH`.
 import argparse
 import os
 import uvicorn
-from config import get_config, get_config_from_path
-from utils.paths import EnginePaths
+from config import get_config
 
 # Importing `api` module below after config is loaded ensures the module
 # picks up the ENGINE_CONFIG_PATH we set from CLI before it reads config.

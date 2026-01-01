@@ -7,20 +7,24 @@ import os
 
 from utils.json_validate import load_json, save_json
 
+
 @dataclass(frozen=True)
 class OrchestratorState:
     """
     Stores active prompt variants per channel/task and A/B test allocation.
     """
+
     version: int
-    active_variants: dict[str, dict[str, str]]  # channel_id -> task_name -> prompt_rel_path
-    ab_tests: dict[str, Any]                    # channel_id -> test metadata
+    active_variants: dict[
+        str, dict[str, str]
+    ]  # channel_id -> task_name -> prompt_rel_path
+    ab_tests: dict[str, Any]  # channel_id -> test metadata
+
 
 DEFAULT_STATE: OrchestratorState = OrchestratorState(
-    version=1,
-    active_variants={},
-    ab_tests={}
+    version=1, active_variants={}, ab_tests={}
 )
+
 
 def load_state(state_path: str) -> OrchestratorState:
     if not os.path.exists(state_path):
@@ -36,6 +40,7 @@ def load_state(state_path: str) -> OrchestratorState:
         active_variants=dict(raw.get("active_variants", {})),
         ab_tests=dict(raw.get("ab_tests", {})),
     )
+
 
 def save_state(state_path: str, state: OrchestratorState) -> None:
     os.makedirs(os.path.dirname(state_path), exist_ok=True)

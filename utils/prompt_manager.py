@@ -6,10 +6,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+
 @dataclass(frozen=True)
 class PromptPatch:
-    target_rel_path: str           # e.g. "tasks/script_generation.txt"
+    target_rel_path: str  # e.g. "tasks/script_generation.txt"
     operations: list[dict[str, Any]]  # bounded operations: insert/replace/append
+
 
 @dataclass(frozen=True)
 class VariantResult:
@@ -17,11 +19,13 @@ class VariantResult:
     files_written: list[str]
     manifest_path: str
 
+
 class PromptManager:
     """
     Creates variant prompt files by copying base prompts + applying bounded operations.
     Never overwrites base prompts.
     """
+
     def __init__(self, engine_root: str) -> None:
         self.engine_root = engine_root
         self.prompts_root = os.path.join(engine_root, "prompts")
@@ -123,6 +127,7 @@ class PromptManager:
             files_written=files_written,
             manifest_path=manifest_rel,
         )
+
     def resolve_task_prompt_for_video(
         self,
         *,

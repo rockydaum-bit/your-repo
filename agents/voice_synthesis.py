@@ -9,6 +9,7 @@ from utils.openai_client import OpenAIJsonClient
 from utils.json_validate import load_json, save_json, validate_json_against_schema
 from utils.elevenlabs_client import ElevenLabsClient
 
+
 @dataclass
 class VoiceSynthesisAgent:
     cfg: EngineConfig
@@ -21,7 +22,9 @@ class VoiceSynthesisAgent:
         with open(self.paths.prompt_path(rel_path), "r", encoding="utf-8") as f:
             return f.read()
 
-    def prepare_tts(self, channel_id: str, run_id: str, script_path: str, output_path: str) -> None:
+    def prepare_tts(
+        self, channel_id: str, run_id: str, script_path: str, output_path: str
+    ) -> None:
         system = self._read_prompt("system/voice_synthesis_system.txt")
         task = self._read_prompt("tasks/tts_directive.txt")
         schema = load_json(self.paths.prompt_path("schemas/script.schema.json"))
@@ -34,9 +37,9 @@ class VoiceSynthesisAgent:
             "_task": "tts",
             "budget_policy": {
                 "elevenlabs_cap_usd": self.cfg.budget.elevenlabs_cap_usd,
-                "stop_at_pct": self.cfg.budget.stop_at_pct
+                "stop_at_pct": self.cfg.budget.stop_at_pct,
             },
-            "script": script
+            "script": script,
         }
 
         out = self.client.run_json(system, task, payload)
@@ -59,8 +62,13 @@ class VoiceSynthesisAgent:
         tts = ElevenLabsClient(api_key=el.api_key)
 
         out_dir = os.path.join(
-            self.cfg.engine_root, "assets", "channels", channel_id,
-            "pipeline", "audio", "narration_chunks"
+            self.cfg.engine_root,
+            "assets",
+            "channels",
+            channel_id,
+            "pipeline",
+            "audio",
+            "narration_chunks",
         )
 
         voice_settings = {
@@ -83,7 +91,7 @@ class VoiceSynthesisAgent:
             "voice_id": result.voice_id,
             "model_id": result.model_id,
             "files": result.outputs,
-            "dir": out_dir
+            "dir": out_dir,
         }
 
         save_json(output_path, merged)

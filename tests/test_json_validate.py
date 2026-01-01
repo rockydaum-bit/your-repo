@@ -1,10 +1,19 @@
 import os
 import pytest
-from utils.json_validate import validate_json_against_schema, load_json, save_json, SchemaValidationError
+from utils.json_validate import (
+    validate_json_against_schema,
+    load_json,
+    save_json,
+    SchemaValidationError,
+)
 
 
 def test_validate_and_io(tmp_path):
-    schema = {"type": "object", "properties": {"name": {"type": "string"}}, "required": ["name"]}
+    schema = {
+        "type": "object",
+        "properties": {"name": {"type": "string"}},
+        "required": ["name"],
+    }
 
     valid = {"name": "x"}
     # should not raise

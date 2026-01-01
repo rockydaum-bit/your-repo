@@ -14,7 +14,9 @@ def _inject_stubs(tmpdir: str):
             openai_api_key="test-key",
             openai_model="gpt-4o",
             timezone="UTC",
-            budget=SimpleNamespace(monthly_cap_usd=150.0, stop_at_pct=0.85, elevenlabs_cap_usd=50.0),
+            budget=SimpleNamespace(
+                monthly_cap_usd=150.0, stop_at_pct=0.85, elevenlabs_cap_usd=50.0
+            ),
             hardware=SimpleNamespace(cpu_pause_pct=85.0, disk_free_pause_pct=10.0),
             youtube=None,
             elevenlabs=None,
@@ -26,14 +28,19 @@ def _inject_stubs(tmpdir: str):
 
     # Stub utils.hardware_monitor
     hw_mod = types.ModuleType("utils.hardware_monitor")
+
     class HWStatus:
         def __init__(self):
             self.cpu_pct = 0.0
             self.disk_free_pct = 100.0
             self.should_pause = False
             self.reasons = []
-    def check_hardware(engine_root: str, cpu_pause_pct: float, disk_free_pause_pct: float):
+
+    def check_hardware(
+        engine_root: str, cpu_pause_pct: float, disk_free_pause_pct: float
+    ):
         return HWStatus()
+
     hw_mod.check_hardware = check_hardware  # type: ignore[attr-defined]
     sys.modules["utils.hardware_monitor"] = hw_mod  # type: ignore[attr-defined]
 
@@ -48,14 +55,19 @@ def _inject_stubs(tmpdir: str):
         def __init__(self, cfg, paths):
             self.cfg = cfg
             self.paths = paths
+
         def generate_plan(self, channel_id, run_id, brief_path, output_path):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             plan = {"video_id": f"{channel_id}_video01"}
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(plan, f)
+
         def generate_script(self, channel_id, run_id, plan_item_path, output_path):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            script = {"video_id": f"{channel_id}_video01", "narration_chunks": [{"text": "hello"}]}
+            script = {
+                "video_id": f"{channel_id}_video01",
+                "narration_chunks": [{"text": "hello"}],
+            }
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(script, f)
 
@@ -63,6 +75,7 @@ def _inject_stubs(tmpdir: str):
         def __init__(self, cfg, paths):
             self.cfg = cfg
             self.paths = paths
+
         def prepare_tts(self, channel_id, run_id, script_path, output_path):
             # read script and write it back (merge step)
             with open(script_path, "r", encoding="utf-8") as f:
@@ -75,6 +88,7 @@ def _inject_stubs(tmpdir: str):
         def __init__(self, cfg, paths):
             self.cfg = cfg
             self.paths = paths
+
         def generate_storyboard(self, channel_id, run_id, script_path, output_path):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             sb = {"shots": []}
@@ -85,9 +99,16 @@ def _inject_stubs(tmpdir: str):
         def __init__(self, cfg, paths):
             self.cfg = cfg
             self.paths = paths
-        def generate_upload_metadata(self, channel_id, run_id, script_path, output_path):
+
+        def generate_upload_metadata(
+            self, channel_id, run_id, script_path, output_path
+        ):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            meta = {"titles": ["Test Title"], "selected_title": "Test Title", "description": ""}
+            meta = {
+                "titles": ["Test Title"],
+                "selected_title": "Test Title",
+                "description": "",
+            }
             with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(meta, f)
 
@@ -96,8 +117,22 @@ def _inject_stubs(tmpdir: str):
     make_agent("agents.audio_video_production", {"AudioVideoProductionAgent": AVStub})
     make_agent("agents.publishing_seo", {"PublishingSEOAgent": PubStub})
     # analytics and optimization modules are not required for _one_video_pipeline but stub them
-    make_agent("agents.analytics_metrics", {"AnalyticsMetricsAgent": type("A", (), {"__init__": lambda self, cfg, paths: None})})
-    make_agent("agents.optimization_scaling", {"OptimizationScalingAgent": type("O", (), {"__init__": lambda self, cfg, paths: None})})
+    make_agent(
+        "agents.analytics_metrics",
+        {
+            "AnalyticsMetricsAgent": type(
+                "A", (), {"__init__": lambda self, cfg, paths: None}
+            )
+        },
+    )
+    make_agent(
+        "agents.optimization_scaling",
+        {
+            "OptimizationScalingAgent": type(
+                "O", (), {"__init__": lambda self, cfg, paths: None}
+            )
+        },
+    )
 
 
 def test_one_video_pipeline_creates_artifacts(tmp_path):
@@ -127,4 +162,5 @@ def test_one_video_pipeline_creates_artifacts(tmp_path):
 
 if __name__ == "__main__":
     import pytest
+
     raise SystemExit(pytest.main([__file__]))

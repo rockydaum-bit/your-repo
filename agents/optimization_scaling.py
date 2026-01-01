@@ -12,6 +12,7 @@ from utils.prompt_manager import PromptManager, PromptPatch
 from utils.state import load_state, save_state, OrchestratorState
 from datetime import datetime, timedelta
 
+
 @dataclass
 class OptimizationScalingAgent:
     cfg: EngineConfig
@@ -19,14 +20,18 @@ class OptimizationScalingAgent:
 
     def __post_init__(self) -> None:
         self.client: Optional[OpenAIJsonClient] = None
-        if getattr(self.cfg, "openai_api_key", None) and getattr(self.cfg, "openai_model", None):
+        if getattr(self.cfg, "openai_api_key", None) and getattr(
+            self.cfg, "openai_model", None
+        ):
             try:
                 # Import at runtime so tests can stub utils.openai_client in sys.modules before instantiation
                 import importlib
 
                 openai_mod = importlib.import_module("utils.openai_client")
                 OpenAIJsonClientCls = getattr(openai_mod, "OpenAIJsonClient")
-                self.client = OpenAIJsonClientCls(self.cfg.openai_api_key, self.cfg.openai_model)
+                self.client = OpenAIJsonClientCls(
+                    self.cfg.openai_api_key, self.cfg.openai_model
+                )
             except Exception:
                 self.client = None
         self.pm = PromptManager(self.cfg.engine_root)
@@ -43,7 +48,14 @@ class OptimizationScalingAgent:
         4) Activate A/B test mapping in orchestrator_state.json
         Returns path to autopatch plan JSON artifact.
         """
-        rollup_dir = os.path.join(self.cfg.engine_root, "assets", "channels", channel_id, "pipeline", "analytics")
+        rollup_dir = os.path.join(
+            self.cfg.engine_root,
+            "assets",
+            "channels",
+            channel_id,
+            "pipeline",
+            "analytics",
+        )
         r7_path = os.path.join(rollup_dir, "rollup_7d.json")
         r28_path = os.path.join(rollup_dir, "rollup_28d.json")
 
@@ -59,21 +71,20 @@ class OptimizationScalingAgent:
 
         system = self._read_prompt("system/optimization_scaling_system.txt")
         task = self._read_prompt("tasks/optimization_autopatch.txt")
-        schema = load_json(self.paths.prompt_path("schemas/optimization_autopatch.schema.json"))
+        schema = load_json(
+            self.paths.prompt_path("schemas/optimization_autopatch.schema.json")
+        )
 
         payload = {
             "channel_id": channel_id,
-            "rollups": {
-                "rollup_7d": rollup_7d,
-                "rollup_28d": rollup_28d
-            },
+            "rollups": {"rollup_7d": rollup_7d, "rollup_28d": rollup_28d},
             "base_prompts": base_prompts,
             "governance": {
                 "bounded_ops_only": True,
                 "max_total_operations": 6,
                 "ab_test_default_videos": 6,
-                "ab_test_default_split": {"base": 0.5, "variant": 0.5}
-            }
+                "ab_test_default_split": {"base": 0.5, "variant": 0.5},
+            },
         }
 
         if self.client is None:
@@ -85,10 +96,12 @@ class OptimizationScalingAgent:
         # Build PromptPatch objects
         patches: list[PromptPatch] = []
         for p in plan["patches"]:
-            patches.append(PromptPatch(
-                target_rel_path=p["target_rel_path"],
-                operations=p["operations"],
-            ))
+            patches.append(
+                PromptPatch(
+                    target_rel_path=p["target_rel_path"],
+                    operations=p["operations"],
+                )
+            )
 
         # Create variant in prompts/variants/...
         variant = self.pm.create_variant(
@@ -100,7 +113,14 @@ class OptimizationScalingAgent:
         )
 
         # Persist autopatch plan artifact
-        out_dir = os.path.join(self.cfg.engine_root, "assets", "channels", channel_id, "pipeline", "optimization")
+        out_dir = os.path.join(
+            self.cfg.engine_root,
+            "assets",
+            "channels",
+            channel_id,
+            "pipeline",
+            "optimization",
+        )
         os.makedirs(out_dir, exist_ok=True)
         out_path = os.path.join(out_dir, "autopatch_plan.json")
         plan_with_variant = dict(plan)
@@ -108,7 +128,9 @@ class OptimizationScalingAgent:
         save_json(out_path, plan_with_variant)
 
         # Activate A/B mapping in orchestrator state
-        state_path = os.path.join(self.cfg.engine_root, "data", "state", "orchestrator_state.json")
+        state_path = os.path.join(
+            self.cfg.engine_root, "data", "state", "orchestrator_state.json"
+        )
         state = load_state(state_path)
 
         # Map base task prompts -> variant rel paths
@@ -201,7 +223,12 @@ def score_ab_test(
         avd = float(avd_raw or 0.0)
 
         if variant not in per_variant:
-            per_variant[variant] = {"views": 0, "revenue": 0.0, "avd": 0.0, "videos": set()}
+            per_variant[variant] = {
+                "views": 0,
+                "revenue": 0.0,
+                "avd": 0.0,
+                "videos": set(),
+            }
         per_variant[variant]["views"] += views
         per_variant[variant]["revenue"] += revenue
         per_variant[variant]["avd"] += avd
@@ -274,9 +301,13 @@ def score_ab_test(
     }
 
 
-def _agent_score_ab_test_wrapper(self, channel_id: str, dry_run: bool = True) -> Dict[str, Any]:
+def _agent_score_ab_test_wrapper(
+    self, channel_id: str, dry_run: bool = True
+) -> Dict[str, Any]:
     # Resolve ab test manifest from state
-    state_path = os.path.join(self.cfg.engine_root, "data", "state", "orchestrator_state.json")
+    state_path = os.path.join(
+        self.cfg.engine_root, "data", "state", "orchestrator_state.json"
+    )
     try:
         state = load_state(state_path)
     except Exception:
@@ -302,15 +333,35 @@ def _agent_score_ab_test_wrapper(self, channel_id: str, dry_run: bool = True) ->
     decision = result.get("suggestion", "none")
 
     # Always write promotion_suggestions.json
-    out_dir = os.path.join(self.cfg.engine_root, "assets", "channels", channel_id, "pipeline", "optimization")
+    out_dir = os.path.join(
+        self.cfg.engine_root,
+        "assets",
+        "channels",
+        channel_id,
+        "pipeline",
+        "optimization",
+    )
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "promotion_suggestions.json")
     save_json(out_path, {"decision": decision, "details": result})
 
     # Guarded apply: only mutate when not dry_run and enabled in config
     applied = False
-    if (not dry_run) and getattr(self.cfg, "enable_auto_promote", False) and decision == "promote":
-        apply_promotion_suggestion(self.paths.db_path, channel_id, variant_manifest_rel, result, enable_apply=True, history_path=os.path.join(self.cfg.engine_root, "data", "state", "promotion_history.json"))
+    if (
+        (not dry_run)
+        and getattr(self.cfg, "enable_auto_promote", False)
+        and decision == "promote"
+    ):
+        apply_promotion_suggestion(
+            self.paths.db_path,
+            channel_id,
+            variant_manifest_rel,
+            result,
+            enable_apply=True,
+            history_path=os.path.join(
+                self.cfg.engine_root, "data", "state", "promotion_history.json"
+            ),
+        )
         applied = True
 
     return {"decision": decision, "applied": applied, "details": result}
@@ -350,7 +401,13 @@ def apply_promotion_suggestion(
     exists = existing["c"] if existing else 0
 
     if not exists:
-        insert_orchestrator_event(db_path, datetime.utcnow().isoformat() + "Z", "INFO", "promotion_suggestion", event)
+        insert_orchestrator_event(
+            db_path,
+            datetime.utcnow().isoformat() + "Z",
+            "INFO",
+            "promotion_suggestion",
+            event,
+        )
         # Append to history file if provided
         if history_path:
             try:

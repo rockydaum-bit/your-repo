@@ -4,6 +4,7 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
+
 def get_logger(name: str, log_dir: str) -> logging.Logger:
     os.makedirs(log_dir, exist_ok=True)
     logger = logging.getLogger(name)
@@ -16,9 +17,7 @@ def get_logger(name: str, log_dir: str) -> logging.Logger:
             backupCount=5,
             encoding="utf-8",
         )
-        fmt = logging.Formatter(
-            "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-        )
+        fmt = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
         fh.setFormatter(fmt)
         logger.addHandler(fh)
 

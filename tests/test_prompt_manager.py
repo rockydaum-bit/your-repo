@@ -22,16 +22,27 @@ def test_apply_operations_and_create_variant(tmp_path):
 
     # insert_after
     base = "a\nMARKER\nb"
-    out2 = pm.apply_operations(base, [{"op": "insert_after", "marker": "MARKER", "text": "INSERTED"}])
+    out2 = pm.apply_operations(
+        base, [{"op": "insert_after", "marker": "MARKER", "text": "INSERTED"}]
+    )
     assert "INSERTED" in out2
 
     # replace
-    out3 = pm.apply_operations("foo old bar", [{"op": "replace", "old": "old", "new": "NEW"}])
+    out3 = pm.apply_operations(
+        "foo old bar", [{"op": "replace", "old": "old", "new": "NEW"}]
+    )
     assert "NEW" in out3
 
     # create variant
-    patches = [PromptPatch(target_rel_path=base_rel, operations=[{"op": "append", "text": "\n// variant"}])]
-    variant = pm.create_variant(channel_id="ch1", variant_name="v1", patches=patches, notes="n", created_by="t")
+    patches = [
+        PromptPatch(
+            target_rel_path=base_rel,
+            operations=[{"op": "append", "text": "\n// variant"}],
+        )
+    ]
+    variant = pm.create_variant(
+        channel_id="ch1", variant_name="v1", patches=patches, notes="n", created_by="t"
+    )
 
     manifest_path = os.path.join(prompts_dir, variant.manifest_path)
     assert os.path.exists(manifest_path)

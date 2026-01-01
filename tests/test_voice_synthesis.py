@@ -12,14 +12,24 @@ def _setup_workspace(tmpdir: str):
     os.makedirs(os.path.join(prompts_dir, "tasks"), exist_ok=True)
     os.makedirs(os.path.join(prompts_dir, "schemas"), exist_ok=True)
 
-    with open(os.path.join(prompts_dir, "system", "voice_synthesis_system.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "system", "voice_synthesis_system.txt"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         f.write("system voice")
-    with open(os.path.join(prompts_dir, "tasks", "tts_directive.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "tasks", "tts_directive.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("task tts")
 
     # minimal script schema
     script_schema = {"type": "object"}
-    with open(os.path.join(prompts_dir, "schemas", "script.schema.json"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "schemas", "script.schema.json"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         json.dump(script_schema, f)
 
 
@@ -30,7 +40,9 @@ def _inject_stubs(tmpdir: str):
             openai_api_key="test-key",
             openai_model="gpt-4o",
             timezone="UTC",
-            budget=SimpleNamespace(monthly_cap_usd=150.0, stop_at_pct=0.85, elevenlabs_cap_usd=50.0),
+            budget=SimpleNamespace(
+                monthly_cap_usd=150.0, stop_at_pct=0.85, elevenlabs_cap_usd=50.0
+            ),
             hardware=SimpleNamespace(cpu_pause_pct=85.0, disk_free_pause_pct=10.0),
             youtube=None,
             elevenlabs=None,
@@ -43,11 +55,16 @@ def _inject_stubs(tmpdir: str):
 
     # stub OpenAI client to return narration_chunks
     oc = types.ModuleType("utils.openai_client")
+
     class OpenAIJsonClient:
         def __init__(self, api_key: str, model: str) -> None:
             pass
-        def run_json(self, system_prompt: str, user_prompt: str, input_payload: dict) -> dict:
+
+        def run_json(
+            self, system_prompt: str, user_prompt: str, input_payload: dict
+        ) -> dict:
             return {"narration_chunks": [{"text": "hello world"}], "disclaimers": []}
+
     oc.OpenAIJsonClient = OpenAIJsonClient
     sys.modules["utils.openai_client"] = oc
 
@@ -57,6 +74,7 @@ def _inject_stubs(tmpdir: str):
 
     # silence schema validation
     import importlib
+
     jv = importlib.import_module("utils.json_validate")
     jv.validate_json_against_schema = lambda *_a, **_k: None
 
@@ -75,7 +93,12 @@ def test_prepare_tts_writes_merged_json(tmp_path):
     agent = mod.VoiceSynthesisAgent(cfg, paths)
     # ensure the agent uses our stubbed OpenAIJsonClient (in case module was previously imported)
     # override client directly to ensure no network calls
-    agent.client = types.SimpleNamespace(run_json=lambda *a, **k: {"narration_chunks": [{"text": "hello world"}], "disclaimers": []})
+    agent.client = types.SimpleNamespace(
+        run_json=lambda *a, **k: {
+            "narration_chunks": [{"text": "hello world"}],
+            "disclaimers": [],
+        }
+    )
 
     channel_id = "channel_001_ai_tools"
     run_id = "test_run"
@@ -88,7 +111,12 @@ def test_prepare_tts_writes_merged_json(tmp_path):
         json.dump({"video_id": "v1"}, f)
 
     out_path = script_path
-    agent.prepare_tts(channel_id=channel_id, run_id=run_id, script_path=script_path, output_path=out_path)
+    agent.prepare_tts(
+        channel_id=channel_id,
+        run_id=run_id,
+        script_path=script_path,
+        output_path=out_path,
+    )
 
     assert os.path.exists(out_path)
     with open(out_path, "r", encoding="utf-8") as f:

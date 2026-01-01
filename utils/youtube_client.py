@@ -13,10 +13,12 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
+
 @dataclass(frozen=True)
 class YouTubeUploadResult:
     youtube_video_id: str
     status: str
+
 
 class YouTubeClient:
     """
@@ -26,10 +28,10 @@ class YouTubeClient:
 
     # Upload scope
     SCOPES = [
-    "https://www.googleapis.com/auth/youtube.upload",
-    "https://www.googleapis.com/auth/youtube.readonly",
-    "https://www.googleapis.com/auth/yt-analytics.readonly",
-]
+        "https://www.googleapis.com/auth/youtube.upload",
+        "https://www.googleapis.com/auth/youtube.readonly",
+        "https://www.googleapis.com/auth/yt-analytics.readonly",
+    ]
 
     def __init__(self, client_secrets_path: str, token_path: str) -> None:
         self.client_secrets_path = client_secrets_path
@@ -44,7 +46,9 @@ class YouTubeClient:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         elif not creds or not creds.valid:
-            flow = InstalledAppFlow.from_client_secrets_file(self.client_secrets_path, self.SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                self.client_secrets_path, self.SCOPES
+            )
             creds = flow.run_local_server(port=0)
 
         os.makedirs(os.path.dirname(self.token_path), exist_ok=True)
@@ -101,14 +105,16 @@ class YouTubeClient:
             try:
                 status, response = request.next_chunk()
                 if response and "id" in response:
-                    return YouTubeUploadResult(youtube_video_id=response["id"], status="uploaded")
+                    return YouTubeUploadResult(
+                        youtube_video_id=response["id"], status="uploaded"
+                    )
 
             except HttpError as e:
                 if e.resp.status in (500, 502, 503, 504, 429):
                     retry += 1
                     if retry > max_retries:
                         raise
-                    sleep = min(2 ** retry, 60)
+                    sleep = min(2**retry, 60)
                     time.sleep(sleep)
                     continue
                 raise
@@ -125,10 +131,7 @@ class YouTubeClient:
         yt = self._service_client()
         media = MediaFileUpload(thumbnail_path, mimetype="image/png")
 
-        request = yt.thumbnails().set(
-            videoId=youtube_video_id,
-            media_body=media
-        )
+        request = yt.thumbnails().set(videoId=youtube_video_id, media_body=media)
 
         retry = 0
         while True:
@@ -140,6 +143,6 @@ class YouTubeClient:
                     retry += 1
                     if retry > max_retries:
                         raise
-                    time.sleep(min(2 ** retry, 60))
+                    time.sleep(min(2**retry, 60))
                     continue
                 raise

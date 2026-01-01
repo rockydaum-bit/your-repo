@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from config import load_config, EngineConfig
+from config import EngineConfig
+
 
 @dataclass(frozen=True)
 class EnginePaths:

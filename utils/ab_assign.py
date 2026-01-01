@@ -4,10 +4,12 @@ import hashlib
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass(frozen=True)
 class ABAssignment:
     arm: str  # "base" or "variant"
     reason: str
+
 
 def stable_bucket(key: str) -> float:
     """
@@ -17,6 +19,7 @@ def stable_bucket(key: str) -> float:
     # use first 15 hex chars -> int -> normalize
     n = int(h[:15], 16)
     return (n % 10_000_000) / 10_000_000.0
+
 
 def choose_arm(
     *,
