@@ -3,12 +3,15 @@ from __future__ import annotations
 import json
 from openai import OpenAI
 
+
 class OpenAIJsonClient:
     def __init__(self, api_key: str, model: str) -> None:
         self.client = OpenAI(api_key=api_key)
         self.model = model
 
-    def run_json(self, system_prompt: str, user_prompt: str, input_payload: dict) -> dict:
+    def run_json(
+        self, system_prompt: str, user_prompt: str, input_payload: dict
+    ) -> dict:
         """
         Forces JSON output by instruction + parsing.
         If the model returns non-JSON, this will raise.
@@ -35,4 +38,6 @@ class OpenAIJsonClient:
         try:
             return json.loads(content)
         except json.JSONDecodeError as e:
-            raise RuntimeError(f"Model did not return valid JSON. Error: {e}\nRaw:\n{content[:2000]}")
+            raise RuntimeError(
+                f"Model did not return valid JSON. Error: {e}\nRaw:\n{content[:2000]}"
+            )

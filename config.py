@@ -110,7 +110,12 @@ def load_config(config_path: Optional[str] = None) -> EngineConfig:
         },
         "channels": [],
         "db": {"driver": "sqlite", "url": "data/revenue.db"},
-        "storage": {"mode": "local", "local_root": ".", "nas_root": None, "object_base_url": None},
+        "storage": {
+            "mode": "local",
+            "local_root": ".",
+            "nas_root": None,
+            "object_base_url": None,
+        },
         "mode": "local",
         "role": "brain",
         "version": "0.0.0-local",
@@ -151,7 +156,10 @@ def load_config(config_path: Optional[str] = None) -> EngineConfig:
     else:
         yt_cfg = base.get("youtube") or {}
         if yt_cfg and yt_cfg.get("client_secrets_path") and yt_cfg.get("token_path"):
-            youtube = YouTubePolicy(client_secrets_path=yt_cfg.get("client_secrets_path"), token_path=yt_cfg.get("token_path"))
+            youtube = YouTubePolicy(
+                client_secrets_path=yt_cfg.get("client_secrets_path"),
+                token_path=yt_cfg.get("token_path"),
+            )
 
     # ElevenLabs
     el_key = os.getenv("ELEVENLABS_API_KEY")
@@ -159,11 +167,21 @@ def load_config(config_path: Optional[str] = None) -> EngineConfig:
     el_model = os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2")
     eleven = None
     if el_key and el_voice:
-        eleven = ElevenLabsPolicy(api_key=el_key, default_voice_id=el_voice, model_id=el_model)
+        eleven = ElevenLabsPolicy(
+            api_key=el_key, default_voice_id=el_voice, model_id=el_model
+        )
 
-    enable_auto_promote = _bool_env("ENABLE_AUTO_PROMOTE", base["ab_testing"]["enable_auto_promote"])
-    auto_promote_min_videos = int(os.getenv("AUTO_PROMOTE_MIN_VIDEOS", base["ab_testing"]["auto_promote_min_videos"]))
-    auto_promote_min_days = int(os.getenv("AUTO_PROMOTE_MIN_DAYS", base["ab_testing"]["auto_promote_min_days"]))
+    enable_auto_promote = _bool_env(
+        "ENABLE_AUTO_PROMOTE", base["ab_testing"]["enable_auto_promote"]
+    )
+    auto_promote_min_videos = int(
+        os.getenv(
+            "AUTO_PROMOTE_MIN_VIDEOS", base["ab_testing"]["auto_promote_min_videos"]
+        )
+    )
+    auto_promote_min_days = int(
+        os.getenv("AUTO_PROMOTE_MIN_DAYS", base["ab_testing"]["auto_promote_min_days"])
+    )
 
     server_host = os.getenv("SERVER_HOST", base["server"]["host"]) or "127.0.0.1"
     server_port = int(os.getenv("SERVER_PORT", base["server"]["port"]))

@@ -17,42 +17,42 @@ def main() -> None:
     paths = EnginePaths(cfg.engine_root)
     db = paths.db_path
 
-    channel_id = 'channel_001_ai_tools'
+    channel_id = "channel_001_ai_tools"
 
     # create two runs
     run1 = str(uuid4())
-    insert_run_start(db, run1, channel_id, 'manual')
-    update_run_end(db, run1, 'success', None)
+    insert_run_start(db, run1, channel_id, "manual")
+    update_run_end(db, run1, "success", None)
 
     run2 = str(uuid4())
-    insert_run_start(db, run2, channel_id, 'cron')
-    update_run_end(db, run2, 'failed', 'Example error: upload failed')
+    insert_run_start(db, run2, channel_id, "cron")
+    update_run_end(db, run2, "failed", "Example error: upload failed")
 
     # add a couple of alerts
     insert_alert(
         db,
         ts=iso_now(),
-        severity='warning',
-        code='upload_slow',
+        severity="warning",
+        code="upload_slow",
         channel_id=channel_id,
         run_id=run2,
-        message='Upload took longer than expected',
+        message="Upload took longer than expected",
         meta_json=None,
     )
 
     insert_alert(
         db,
         ts=iso_now(),
-        severity='error',
-        code='publish_failed',
+        severity="error",
+        code="publish_failed",
         channel_id=channel_id,
         run_id=run2,
-        message='Publish step failed with exit code 1',
+        message="Publish step failed with exit code 1",
         meta_json=None,
     )
 
-    print('Seeded sample runs and alerts')
+    print("Seeded sample runs and alerts")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

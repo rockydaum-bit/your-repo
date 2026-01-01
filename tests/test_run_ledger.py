@@ -2,6 +2,7 @@ import sqlite3
 from utils.paths import EnginePaths
 from utils.db import init_db, insert_run_start, update_run_end
 
+
 def test_run_ledger_inserts_and_updates(tmp_path):
     root = str(tmp_path)
     paths = EnginePaths(root)

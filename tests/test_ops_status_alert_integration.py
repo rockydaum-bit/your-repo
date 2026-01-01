@@ -1,9 +1,9 @@
-import sqlite3
 from utils.paths import EnginePaths
-from utils.db import init_db, connect, insert_run_start, update_run_end
+from utils.db import init_db, connect
 from utils.alerts import raise_alert
 from utils.ops_status import generate_channel_status
 from config import EngineConfig
+
 
 def test_ops_status_overall_status_reflects_alerts(tmp_path):
     root = str(tmp_path)
@@ -26,7 +26,9 @@ def test_ops_status_overall_status_reflects_alerts(tmp_path):
     # No alerts -> status ok
     snap = generate_channel_status(cfg, paths, "ch1")
     assert snap["status"]["overall_status"] == "ok"
-    assert snap["status"]["latest_alerts"] == [] or isinstance(snap["status"]["latest_alerts"], list)
+    assert snap["status"]["latest_alerts"] == [] or isinstance(
+        snap["status"]["latest_alerts"], list
+    )
 
     # Add warning alert -> degraded
     raise_alert(

@@ -10,6 +10,7 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
+
 @dataclass(frozen=True)
 class ChannelKpis:
     views: float | None
@@ -18,6 +19,7 @@ class ChannelKpis:
     subs_net: float | None
     estimated_revenue_usd: float | None
 
+
 @dataclass(frozen=True)
 class VideoKpis:
     youtube_video_id: str
@@ -25,6 +27,7 @@ class VideoKpis:
     watch_time_hours: float | None
     avg_view_duration_sec: float | None
     estimated_revenue_usd: float | None
+
 
 class YouTubeAnalyticsClient:
     """
@@ -47,18 +50,23 @@ class YouTubeAnalyticsClient:
         creds: Credentials | None = None
         if self.token_path and self.token_path.strip():
             try:
-                creds = Credentials.from_authorized_user_file(self.token_path, self.SCOPES)
+                creds = Credentials.from_authorized_user_file(
+                    self.token_path, self.SCOPES
+                )
             except Exception:
                 creds = None
 
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         elif not creds or not creds.valid:
-            flow = InstalledAppFlow.from_client_secrets_file(self.client_secrets_path, self.SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                self.client_secrets_path, self.SCOPES
+            )
             creds = flow.run_local_server(port=0)
 
         # persist token
         import os
+
         os.makedirs(os.path.dirname(self.token_path), exist_ok=True)
         with open(self.token_path, "w", encoding="utf-8") as f:
             f.write(creds.to_json())
@@ -86,14 +94,18 @@ class YouTubeAnalyticsClient:
         """
         _, yta = self._clients()
         try:
-            resp = yta.reports().query(
-                ids="channel==MINE",
-                startDate=start.isoformat(),
-                endDate=end.isoformat(),
-                metrics="views,watchTime,averageViewDuration,subscribersGained,subscribersLost,estimatedRevenue",
-                dimensions=None,
-                sort=None,
-            ).execute()
+            resp = (
+                yta.reports()
+                .query(
+                    ids="channel==MINE",
+                    startDate=start.isoformat(),
+                    endDate=end.isoformat(),
+                    metrics="views,watchTime,averageViewDuration,subscribersGained,subscribersLost,estimatedRevenue",
+                    dimensions=None,
+                    sort=None,
+                )
+                .execute()
+            )
         except HttpError as e:
             raise RuntimeError(f"YouTube Analytics channel query failed: {e}")
 
@@ -111,8 +123,14 @@ class YouTubeAnalyticsClient:
         subs_lost = float(r[4]) if r[4] is not None else None
         est_rev = float(r[5]) if r[5] is not None else None
 
-        watch_time_hours = (watch_time_minutes / 60.0) if watch_time_minutes is not None else None
-        subs_net = (subs_gained - subs_lost) if (subs_gained is not None and subs_lost is not None) else None
+        watch_time_hours = (
+            (watch_time_minutes / 60.0) if watch_time_minutes is not None else None
+        )
+        subs_net = (
+            (subs_gained - subs_lost)
+            if (subs_gained is not None and subs_lost is not None)
+            else None
+        )
 
         return ChannelKpis(
             views=views,
@@ -122,7 +140,9 @@ class YouTubeAnalyticsClient:
             estimated_revenue_usd=est_rev,
         )
 
-    def query_videos_kpis(self, *, start: date, end: date, youtube_video_ids: list[str]) -> list[VideoKpis]:
+    def query_videos_kpis(
+        self, *, start: date, end: date, youtube_video_ids: list[str]
+    ) -> list[VideoKpis]:
         """
         Pull per-video KPIs for given IDs and date window.
         Returns list aligned to returned rows (not necessarily input order).
@@ -140,14 +160,18 @@ class YouTubeAnalyticsClient:
 
         for vid in youtube_video_ids:
             try:
-                resp = yta.reports().query(
-                    ids="channel==MINE",
-                    startDate=start.isoformat(),
-                    endDate=end.isoformat(),
-                    metrics="views,watchTime,averageViewDuration,estimatedRevenue",
-                    dimensions=None,
-                    filters=f"video=={vid}",
-                ).execute()
+                resp = (
+                    yta.reports()
+                    .query(
+                        ids="channel==MINE",
+                        startDate=start.isoformat(),
+                        endDate=end.isoformat(),
+                        metrics="views,watchTime,averageViewDuration,estimatedRevenue",
+                        dimensions=None,
+                        filters=f"video=={vid}",
+                    )
+                    .execute()
+                )
             except HttpError:
                 # If a given video returns no data or access error, record nulls
                 results.append(VideoKpis(vid, None, None, None, None))
@@ -164,8 +188,12 @@ class YouTubeAnalyticsClient:
             avg_view_duration_sec = float(r[2]) if r[2] is not None else None
             est_rev = float(r[3]) if r[3] is not None else None
 
-            watch_time_hours = (watch_time_minutes / 60.0) if watch_time_minutes is not None else None
+            watch_time_hours = (
+                (watch_time_minutes / 60.0) if watch_time_minutes is not None else None
+            )
 
-            results.append(VideoKpis(vid, views, watch_time_hours, avg_view_duration_sec, est_rev))
+            results.append(
+                VideoKpis(vid, views, watch_time_hours, avg_view_duration_sec, est_rev)
+            )
 
         return results

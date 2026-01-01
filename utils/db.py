@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sqlite3
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Iterator, Any, Dict, List, Optional
 import json
 
 
@@ -78,8 +78,7 @@ CREATE TABLE IF NOT EXISTS alerts (
 """
 
 # --- Alerts Helpers ---
-from typing import Any, Dict, List, Optional
-from datetime import datetime
+
 
 def insert_alert(
     db_path: str,
@@ -93,11 +92,13 @@ def insert_alert(
     meta_json: Optional[str],
 ) -> None:
     from utils.db import connect  # avoid circulars if any
+
     with connect(db_path) as con:
         con.execute(
             "INSERT INTO alerts (ts, severity, code, channel_id, run_id, message, meta_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (ts, severity, code, channel_id, run_id, message, meta_json),
         )
+
 
 def fetch_recent_alerts(
     db_path: str,
@@ -107,6 +108,7 @@ def fetch_recent_alerts(
 ) -> List[Dict[str, Any]]:
     from utils.db import connect  # avoid circulars if any
     import sqlite3
+
     with connect(db_path) as con:
         con.row_factory = sqlite3.Row
         cur = con.cursor()
@@ -122,6 +124,7 @@ def fetch_recent_alerts(
             )
         rows = cur.fetchall()
     return [dict(row) for row in rows]
+
 
 SCHEMA_SQL += """
 CREATE TABLE IF NOT EXISTS runs (
@@ -146,6 +149,7 @@ CREATE TABLE IF NOT EXISTS prompt_assignments (
 );
 """
 
+
 @contextmanager
 def connect(db_path: str) -> Iterator[sqlite3.Connection]:
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
@@ -157,16 +161,27 @@ def connect(db_path: str) -> Iterator[sqlite3.Connection]:
     finally:
         con.close()
 
+
 def init_db(db_path: str) -> None:
     with connect(db_path) as con:
         con.executescript(SCHEMA_SQL)
 
-def insert_cost(db_path: str, ts: str, vendor: str, category: str, amount_usd: float, run_id: str | None = None, notes: str | None = None) -> None:
+
+def insert_cost(
+    db_path: str,
+    ts: str,
+    vendor: str,
+    category: str,
+    amount_usd: float,
+    run_id: str | None = None,
+    notes: str | None = None,
+) -> None:
     with connect(db_path) as con:
         con.execute(
             "INSERT INTO costs (ts, vendor, category, amount_usd, run_id, notes) VALUES (?, ?, ?, ?, ?, ?)",
             (ts, vendor, category, amount_usd, run_id, notes),
         )
+
 
 def sum_costs_month(db_path: str, month_prefix: str) -> float:
     # month_prefix like "2025-12"
@@ -177,7 +192,10 @@ def sum_costs_month(db_path: str, month_prefix: str) -> float:
         ).fetchone()
         return float(row["total"]) if row else 0.0
 
-def log_event(db_path: str, ts: str, level: str, event: str, payload_json: str = "{}") -> None:
+
+def log_event(
+    db_path: str, ts: str, level: str, event: str, payload_json: str = "{}"
+) -> None:
     with connect(db_path) as con:
         con.execute(
             "INSERT INTO orchestrator_events (ts, level, event, payload_json) VALUES (?, ?, ?, ?)",
@@ -198,8 +216,15 @@ def insert_orchestrator_event(
             INSERT INTO orchestrator_events (ts, level, event, payload_json)
             VALUES (?, ?, ?, ?)
             """,
-            (ts, level, event, json.dumps(payload or {}, separators=(',', ':'), ensure_ascii=False)),
+            (
+                ts,
+                level,
+                event,
+                json.dumps(payload or {}, separators=(",", ":"), ensure_ascii=False),
+            ),
         )
+
+
 def insert_analytics_daily(
     db_path: str,
     ts: str,
@@ -220,8 +245,20 @@ def insert_analytics_daily(
             (ts, channel_id, video_id, views, watch_time_hours, ctr, avg_view_duration_sec, rpm, subs_net, revenue_usd)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (ts, channel_id, video_id, views, watch_time_hours, ctr, avg_view_duration_sec, rpm, subs_net, revenue_usd),
+            (
+                ts,
+                channel_id,
+                video_id,
+                views,
+                watch_time_hours,
+                ctr,
+                avg_view_duration_sec,
+                rpm,
+                subs_net,
+                revenue_usd,
+            ),
         )
+
 
 def list_recent_videos(db_path: str, channel_id: str, limit: int = 50) -> list[dict]:
     with connect(db_path) as con:
@@ -237,7 +274,10 @@ def list_recent_videos(db_path: str, channel_id: str, limit: int = 50) -> list[d
         ).fetchall()
         return [dict(r) for r in rows]
 
-def list_prompt_assignments_for_manifest(db_path: str, channel_id: str, variant_manifest_rel: str) -> list[dict]:
+
+def list_prompt_assignments_for_manifest(
+    db_path: str, channel_id: str, variant_manifest_rel: str
+) -> list[dict]:
     with connect(db_path) as con:
         rows = con.execute(
             """
@@ -263,14 +303,20 @@ def insert_run_start(db_path: str, run_id: str, channel_id: str, mode: str) -> N
     # pass through to new hybrid helper; preserve provided run_id
     db_runs.insert_run_start(db_path, run_id=run_id, channel_id=channel_id, mode=mode)
 
-def update_run_end(db_path: str, run_id: str, status: str, error_message: str | None = None) -> None:
+
+def update_run_end(
+    db_path: str, run_id: str, status: str, error_message: str | None = None
+) -> None:
     """Legacy-compatible wrapper that funnels to utils.db_runs.update_run_end.
 
     Preserves the original signature for backward compatibility.
     """
     from utils import db_runs
 
-    db_runs.update_run_end(db_path, run_id=run_id, status=status, error_message=error_message)
+    db_runs.update_run_end(
+        db_path, run_id=run_id, status=status, error_message=error_message
+    )
+
 
 def upsert_video_publish(
     db_path: str,
@@ -329,7 +375,16 @@ def upsert_video_publication(
             SET platform_video_id = ?, run_id = ?, published_ts = ?, status = ?, metadata_json = ?
             WHERE channel_id = ? AND video_id = ? AND platform = ?
             """,
-            (platform_video_id, run_id, published_ts, status, meta_json, channel_id, video_id, platform),
+            (
+                platform_video_id,
+                run_id,
+                published_ts,
+                status,
+                meta_json,
+                channel_id,
+                video_id,
+                platform,
+            ),
         )
         if cur.rowcount and cur.rowcount > 0:
             return
@@ -340,11 +395,22 @@ def upsert_video_publication(
             (channel_id, video_id, platform, platform_video_id, run_id, published_ts, status, metadata_json)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (channel_id, video_id, platform, platform_video_id, run_id, published_ts, status, meta_json),
+            (
+                channel_id,
+                video_id,
+                platform,
+                platform_video_id,
+                run_id,
+                published_ts,
+                status,
+                meta_json,
+            ),
         )
 
 
-def list_video_publications(db_path: str, channel_id: str, limit: int = 50) -> list[dict]:
+def list_video_publications(
+    db_path: str, channel_id: str, limit: int = 50
+) -> list[dict]:
     with connect(db_path) as con:
         rows = con.execute(
             """
@@ -366,6 +432,8 @@ def list_video_publications(db_path: str, channel_id: str, limit: int = 50) -> l
             else:
                 r["metadata"] = None
         return results
+
+
 def get_prompt_assignment(db_path: str, channel_id: str, video_id: str) -> str | None:
     with connect(db_path) as con:
         row = con.execute(
@@ -373,6 +441,7 @@ def get_prompt_assignment(db_path: str, channel_id: str, video_id: str) -> str |
             (channel_id, video_id),
         ).fetchone()
         return str(row["arm"]) if row else None
+
 
 def upsert_prompt_assignment(
     db_path: str,

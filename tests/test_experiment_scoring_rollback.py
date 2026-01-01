@@ -14,6 +14,7 @@ def seed_assignment(con, channel_id, video_id, arm, manifest_rel="m.json"):
         ("2025-01-01T00:00:00Z", channel_id, video_id, arm, manifest_rel, "t"),
     )
 
+
 def seed_analytics(con, channel_id, video_id, views, revenue, avd):
     con.execute(
         """
@@ -23,6 +24,7 @@ def seed_analytics(con, channel_id, video_id, views, revenue, avd):
         ("2025-01-01T00:00:00Z", channel_id, video_id, views, revenue, avd),
     )
 
+
 def test_score_ab_test_rollback(tmp_path):
     root = str(tmp_path)
     paths = EnginePaths(root)
@@ -31,19 +33,30 @@ def test_score_ab_test_rollback(tmp_path):
     state_dir = os.path.join(root, "data", "state")
     os.makedirs(state_dir, exist_ok=True)
     state_path = os.path.join(state_dir, "orchestrator_state.json")
-    save_json(state_path, {
-        "version": 1,
-        "active_variants": {"ch1": {"tasks/script_generation.txt": "prompts/variants/ch1/v1.txt"}},
-        "ab_tests": {"ch1": {"enabled": True, "videos": 6, "variant_manifest_rel": "m.json"}}
-    })
+    save_json(
+        state_path,
+        {
+            "version": 1,
+            "active_variants": {
+                "ch1": {"tasks/script_generation.txt": "prompts/variants/ch1/v1.txt"}
+            },
+            "ab_tests": {
+                "ch1": {"enabled": True, "videos": 6, "variant_manifest_rel": "m.json"}
+            },
+        },
+    )
 
     con = sqlite3.connect(paths.db_path)
 
     for i in range(6):
         seed_assignment(con, "ch1", f"b{i}", "base")
         seed_assignment(con, "ch1", f"v{i}", "variant")
-        seed_analytics(con, "ch1", f"b{i}", views=100, revenue=1.0, avd=60)   # base rpm=0.01
-        seed_analytics(con, "ch1", f"v{i}", views=100, revenue=0.8, avd=55)   # variant rpm=0.008 (down)
+        seed_analytics(
+            con, "ch1", f"b{i}", views=100, revenue=1.0, avd=60
+        )  # base rpm=0.01
+        seed_analytics(
+            con, "ch1", f"v{i}", views=100, revenue=0.8, avd=55
+        )  # variant rpm=0.008 (down)
     con.commit()
     con.close()
 
@@ -58,5 +71,15 @@ def test_score_ab_test_rollback(tmp_path):
     out = agent.score_ab_test("ch1", dry_run=True)
     assert out["decision"] == "rollback"
 
-    sugg = load_json(os.path.join(root, "assets", "channels", "ch1", "pipeline", "optimization", "promotion_suggestions.json"))
+    sugg = load_json(
+        os.path.join(
+            root,
+            "assets",
+            "channels",
+            "ch1",
+            "pipeline",
+            "optimization",
+            "promotion_suggestions.json",
+        )
+    )
     assert sugg["decision"] == "rollback"

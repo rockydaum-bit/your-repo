@@ -9,6 +9,7 @@ from utils.openai_client import OpenAIJsonClient
 from utils.json_validate import load_json, save_json, validate_json_against_schema
 from utils.state import load_state
 
+
 @dataclass
 class ContentGenerationAgent:
     cfg: EngineConfig
@@ -24,7 +25,9 @@ class ContentGenerationAgent:
         """
         chosen = rel_path
         if channel_id and rel_path.startswith("tasks/"):
-            state_path = os.path.join(self.cfg.engine_root, "data", "state", "orchestrator_state.json")
+            state_path = os.path.join(
+                self.cfg.engine_root, "data", "state", "orchestrator_state.json"
+            )
             state = load_state(state_path)
             mapping = state.active_variants.get(channel_id, {})
             # mapping key is base_rel_path (e.g., tasks/script_generation.txt)
@@ -34,8 +37,9 @@ class ContentGenerationAgent:
         with open(self.paths.prompt_path(chosen), "r", encoding="utf-8") as f:
             return f.read()
 
-
-    def generate_plan(self, channel_id: str, run_id: str, brief_path: str, output_path: str) -> None:
+    def generate_plan(
+        self, channel_id: str, run_id: str, brief_path: str, output_path: str
+    ) -> None:
         system = self._read_prompt("system/content_generation_system.txt")
         task = self._read_prompt("tasks/script_generation.txt", channel_id=channel_id)
         schema = load_json(self.paths.prompt_path("schemas/content_plan.schema.json"))
@@ -47,11 +51,7 @@ class ContentGenerationAgent:
             "timezone": self.cfg.timezone,
             "brief": brief,
             "_task": "week_plan",
-            "constraints": {
-                "weekly_videos": 3,
-                "weeks": 4,
-                "policy_mode": "standard"
-            }
+            "constraints": {"weekly_videos": 3, "weeks": 4, "policy_mode": "standard"},
         }
 
         out = self.client.run_json(system, task, payload)
@@ -70,13 +70,15 @@ class ContentGenerationAgent:
                 "persona": brief.get("video_seed", {}).get("persona", "SMB owner"),
                 "hook": "If your business still does these tasks manually, you’re burning money.",
                 "affiliate_intent": "high",
-                "expected_rpm_band": "high"
+                "expected_rpm_band": "high",
             }
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         save_json(output_path, plan_item)
 
-    def generate_script(self, channel_id: str, run_id: str, plan_item_path: str, output_path: str) -> None:
+    def generate_script(
+        self, channel_id: str, run_id: str, plan_item_path: str, output_path: str
+    ) -> None:
         system = self._read_prompt("system/content_generation_system.txt")
         task = self._read_prompt("tasks/script_generation.txt")
         schema = load_json(self.paths.prompt_path("schemas/script.schema.json"))
@@ -88,11 +90,8 @@ class ContentGenerationAgent:
             "plan_item": plan_item,
             "_task": "script",
             "runtime_target_min": 14,
-            "retention_rules": {
-                "hook_seconds": 15,
-                "pattern_interrupt_seconds": 120
-            },
-            "policy_mode": "standard"
+            "retention_rules": {"hook_seconds": 15, "pattern_interrupt_seconds": 120},
+            "policy_mode": "standard",
         }
 
         out = self.client.run_json(system, task, payload)

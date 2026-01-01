@@ -2,6 +2,7 @@ from config import get_config
 from utils.paths import EnginePaths
 from agents.analytics_metrics import AnalyticsMetricsAgent
 
+
 def main() -> None:
     cfg = get_config()
     paths = EnginePaths(cfg.engine_root)
@@ -14,6 +15,7 @@ def main() -> None:
     print("Wrote rollups:")
     print(p7)
     print(p28)
+
 
 if __name__ == "__main__":
     main()

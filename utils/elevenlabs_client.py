@@ -7,11 +7,13 @@ import requests
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass(frozen=True)
 class ElevenLabsResult:
     voice_id: str
     model_id: str
     outputs: list[str]  # file paths written
+
 
 class ElevenLabsClient:
     """
@@ -20,7 +22,10 @@ class ElevenLabsClient:
     Endpoint (per docs): POST /v1/text-to-speech/{voice_id}
     Auth header: xi-api-key
     """
-    def __init__(self, api_key: str, base_url: str = "https://api.elevenlabs.io") -> None:
+
+    def __init__(
+        self, api_key: str, base_url: str = "https://api.elevenlabs.io"
+    ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
 
@@ -73,16 +78,18 @@ class ElevenLabsClient:
 
                 # Retry on rate limits / transient
                 if resp.status_code in (408, 429, 500, 502, 503, 504):
-                    wait = min(2 ** attempt, 30)
+                    wait = min(2**attempt, 30)
                     time.sleep(wait)
                     continue
 
                 # Non-retryable
-                raise RuntimeError(f"ElevenLabs error {resp.status_code}: {resp.text[:500]}")
+                raise RuntimeError(
+                    f"ElevenLabs error {resp.status_code}: {resp.text[:500]}"
+                )
 
             except Exception as e:
                 last_err = e
-                wait = min(2 ** attempt, 30)
+                wait = min(2**attempt, 30)
                 time.sleep(wait)
 
         raise RuntimeError(f"ElevenLabs synth failed after retries: {last_err}")

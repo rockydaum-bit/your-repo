@@ -1,10 +1,12 @@
 .env.example
 .gitattributes
+.github/CODEOWNERS
 .github/PULL_REQUEST_TEMPLATE/pr_template.md
 .github/PULL_REQUEST_TEMPLATE/reviewer_checklist.md
 .github/workflows/acceptance.yml
 .github/workflows/ci.yml
 .github/workflows/coverage-ratchet.yml
+.github/workflows/inventory-manual.yml
 CONTRIBUTING.md
 README.md
 agents/__init__.py

@@ -12,9 +12,15 @@ def _setup_workspace(tmpdir: str, channel_id: str):
     os.makedirs(os.path.join(prompts_dir, "variants"), exist_ok=True)
 
     # base task prompts
-    with open(os.path.join(prompts_dir, "tasks", "script_generation.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "tasks", "script_generation.txt"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         f.write("base script prompt")
-    with open(os.path.join(prompts_dir, "tasks", "upload_metadata.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "tasks", "upload_metadata.txt"), "w", encoding="utf-8"
+    ) as f:
         f.write("base upload metadata prompt")
 
     # ensure prompts/schemas dir exists for other agents
@@ -22,16 +28,30 @@ def _setup_workspace(tmpdir: str, channel_id: str):
 
     # system prompt and optimization task prompt + schema
     os.makedirs(os.path.join(prompts_dir, "system"), exist_ok=True)
-    with open(os.path.join(prompts_dir, "system", "optimization_scaling_system.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "system", "optimization_scaling_system.txt"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         f.write("system optimization")
-    with open(os.path.join(prompts_dir, "tasks", "optimization_autopatch.txt"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "tasks", "optimization_autopatch.txt"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         f.write("task autopatch")
     # minimal schema accepting object
-    with open(os.path.join(prompts_dir, "schemas", "optimization_autopatch.schema.json"), "w", encoding="utf-8") as f:
+    with open(
+        os.path.join(prompts_dir, "schemas", "optimization_autopatch.schema.json"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         json.dump({"type": "object"}, f)
 
     # make rollup dir empty (agent should handle missing rollups)
-    analytics_dir = os.path.join(tmpdir, "assets", "channels", channel_id, "pipeline", "analytics")
+    analytics_dir = os.path.join(
+        tmpdir, "assets", "channels", channel_id, "pipeline", "analytics"
+    )
     os.makedirs(analytics_dir, exist_ok=True)
 
 
@@ -43,7 +63,9 @@ def _inject_stubs(tmpdir: str):
             openai_api_key="test-key",
             openai_model="gpt-4o",
             timezone="UTC",
-            budget=SimpleNamespace(monthly_cap_usd=150.0, stop_at_pct=0.85, elevenlabs_cap_usd=50.0),
+            budget=SimpleNamespace(
+                monthly_cap_usd=150.0, stop_at_pct=0.85, elevenlabs_cap_usd=50.0
+            ),
             hardware=SimpleNamespace(cpu_pause_pct=85.0, disk_free_pause_pct=10.0),
             youtube=None,
             elevenlabs=None,
@@ -56,19 +78,32 @@ def _inject_stubs(tmpdir: str):
 
     # stub OpenAI client
     oc = types.ModuleType("utils.openai_client")
+
     class OpenAIJsonClient:
         def __init__(self, api_key: str, model: str) -> None:
             pass
-        def run_json(self, system_prompt: str, user_prompt: str, input_payload: dict) -> dict:
+
+        def run_json(
+            self, system_prompt: str, user_prompt: str, input_payload: dict
+        ) -> dict:
             # Return a plan with one patch touching script_generation.txt
             return {
                 "patches": [
-                    {"target_rel_path": "tasks/script_generation.txt", "operations": [{"op": "append", "text": "\n// variant"}]}
+                    {
+                        "target_rel_path": "tasks/script_generation.txt",
+                        "operations": [{"op": "append", "text": "\n// variant"}],
+                    }
                 ],
                 "variant_name": "test_variant",
                 "notes": "auto",
-                "ab_test": {"enabled": True, "allocation": {"base": 0.5, "variant": 0.5}, "videos": 6, "success_metrics": []}
+                "ab_test": {
+                    "enabled": True,
+                    "allocation": {"base": 0.5, "variant": 0.5},
+                    "videos": 6,
+                    "success_metrics": [],
+                },
             }
+
     oc.OpenAIJsonClient = OpenAIJsonClient
     sys.modules["utils.openai_client"] = oc
 
@@ -101,7 +136,9 @@ def test_run_weekly_optimization_creates_autopatch(tmp_path):
     assert "variant_manifest_rel" in plan
 
     # state should have been updated
-    state_path = os.path.join(cfg.engine_root, "data", "state", "orchestrator_state.json")
+    state_path = os.path.join(
+        cfg.engine_root, "data", "state", "orchestrator_state.json"
+    )
     assert os.path.exists(state_path)
     with open(state_path, "r", encoding="utf-8") as f:
         state = json.load(f)

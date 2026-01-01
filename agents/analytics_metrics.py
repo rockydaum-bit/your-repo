@@ -12,6 +12,7 @@ from utils.youtube_analytics_client import YouTubeAnalyticsClient
 from utils.db import sum_costs_month
 from utils.json_validate import load_json as load_json_file
 
+
 @dataclass
 class AnalyticsMetricsAgent:
     cfg: EngineConfig
@@ -26,7 +27,9 @@ class AnalyticsMetricsAgent:
         Returns rollup JSON path.
         """
         if not self.cfg.youtube:
-            raise RuntimeError("YouTube not configured. Set YOUTUBE_CLIENT_SECRETS_PATH and YOUTUBE_TOKEN_PATH.")
+            raise RuntimeError(
+                "YouTube not configured. Set YOUTUBE_CLIENT_SECRETS_PATH and YOUTUBE_TOKEN_PATH."
+            )
 
         yta = YouTubeAnalyticsClient(
             client_secrets_path=self.cfg.youtube.client_secrets_path,
@@ -51,8 +54,12 @@ class AnalyticsMetricsAgent:
 
         # Per-video KPIs for recently known videos that have youtube_video_id set
         recent = list_recent_videos(self.paths.db_path, channel_id, limit=50)
-        youtube_ids = [r["youtube_video_id"] for r in recent if r.get("youtube_video_id")]
-        video_kpis = yta.query_videos_kpis(start=start_d, end=end_d, youtube_video_ids=youtube_ids)
+        youtube_ids = [
+            r["youtube_video_id"] for r in recent if r.get("youtube_video_id")
+        ]
+        video_kpis = yta.query_videos_kpis(
+            start=start_d, end=end_d, youtube_video_ids=youtube_ids
+        )
 
         missing_data: list[str] = []
         if ch.views is None:
@@ -64,7 +71,9 @@ class AnalyticsMetricsAgent:
         if ch.subs_net is None:
             missing_data.append("subs_net")
         # CTR is not always available via Analytics API depending on query; leaving null by design.
-        missing_data.append("ctr")  # explicitly unsupported in this rollup implementation
+        missing_data.append(
+            "ctr"
+        )  # explicitly unsupported in this rollup implementation
 
         rollup = {
             "channel_id": channel_id,
@@ -124,7 +133,14 @@ class AnalyticsMetricsAgent:
         schema = load_json_file(schema_path)
         validate_json_against_schema(rollup, schema)
 
-        out_dir = os.path.join(self.cfg.engine_root, "assets", "channels", channel_id, "pipeline", "analytics")
+        out_dir = os.path.join(
+            self.cfg.engine_root,
+            "assets",
+            "channels",
+            channel_id,
+            "pipeline",
+            "analytics",
+        )
         os.makedirs(out_dir, exist_ok=True)
         out_path = os.path.join(out_dir, f"rollup_{window_days}d.json")
         save_json(out_path, rollup)

@@ -1,11 +1,10 @@
 from fastapi import FastAPI, HTTPException, Query
-from typing import List, Optional
+from typing import Optional
 import os
 import json
 from config import get_config
 from utils.paths import EnginePaths
 from utils.ops_status import generate_channel_status
-from utils.db import connect
 from utils.db import fetch_recent_alerts, list_video_publications
 from utils.ops_status import get_worker_status
 from utils.db_runs import fetch_recent_runs
@@ -44,11 +43,17 @@ if not UI_DIST.exists():
 
 # Utility: List all channel directories under assets/channels
 
+
 def list_channels():
     channels_root = os.path.join(cfg.engine_root, "assets", "channels")
     if not os.path.isdir(channels_root):
         return []
-    return [d for d in os.listdir(channels_root) if os.path.isdir(os.path.join(channels_root, d))]
+    return [
+        d
+        for d in os.listdir(channels_root)
+        if os.path.isdir(os.path.join(channels_root, d))
+    ]
+
 
 @app.get("/api/channels")
 def get_channels():
@@ -61,12 +66,15 @@ def get_channels():
             continue
         seen.add(channel_id)
         status = generate_channel_status(cfg, paths, channel_id)
-        result.append({
-            "channel_id": channel_id,
-            "name": channel_id,  # Placeholder for future friendly name
-            "overall_status": status.get("overall_status", "unknown"),
-        })
+        result.append(
+            {
+                "channel_id": channel_id,
+                "name": channel_id,  # Placeholder for future friendly name
+                "overall_status": status.get("overall_status", "unknown"),
+            }
+        )
     return result
+
 
 @app.get("/api/channels/{channel_id}/status")
 def get_channel_status(channel_id: str):
@@ -76,8 +84,11 @@ def get_channel_status(channel_id: str):
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Channel not found or error: {e}")
 
+
 @app.get("/api/channels/{channel_id}/alerts")
-def get_channel_alerts(channel_id: str, severity: Optional[str] = Query(None), limit: int = 50):
+def get_channel_alerts(
+    channel_id: str, severity: Optional[str] = Query(None), limit: int = 50
+):
     # severity: "info" | "warning" | "error" (optional)
     alerts = fetch_recent_alerts(paths.db_path, channel_id=channel_id, limit=limit)
     if severity:
@@ -94,6 +105,7 @@ def get_channel_alerts(channel_id: str, severity: Optional[str] = Query(None), l
         a.pop("meta_json", None)
     return alerts
 
+
 @app.get("/api/channels/{channel_id}/runs")
 def get_channel_runs(channel_id: str, limit: int = 50):
     runs = fetch_recent_runs(paths.db_path, channel_id=channel_id, limit=limit)
@@ -103,7 +115,9 @@ def get_channel_runs(channel_id: str, limit: int = 50):
 @app.get("/api/channels/{channel_id}/publications")
 def get_channel_publications(channel_id: str, limit: int = 50):
     try:
-        rows = list_video_publications(paths.db_path, channel_id=channel_id, limit=limit)
+        rows = list_video_publications(
+            paths.db_path, channel_id=channel_id, limit=limit
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB error: {e}")
 

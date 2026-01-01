@@ -1,7 +1,7 @@
-import os
 from utils.paths import EnginePaths
 from utils.db import init_db
 from utils.alerts import raise_alert, get_recent_alerts
+
 
 def test_raise_and_get_recent_alerts(tmp_path):
     root = str(tmp_path)

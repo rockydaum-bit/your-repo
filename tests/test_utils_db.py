@@ -20,7 +20,9 @@ def test_db_init_and_costs(tmp_path):
     db.log_event(db_path, ts, "INFO", "test_event", json.dumps({"k": "v"}))
 
     # insert analytics daily
-    db.insert_analytics_daily(db_path, ts, "channel_x", "vid1", 100.0, 1.5, 0.1, 30.0, 2.5, 1, 123.45)
+    db.insert_analytics_daily(
+        db_path, ts, "channel_x", "vid1", 100.0, 1.5, 0.1, 30.0, 2.5, 1, 123.45
+    )
 
     # direct insert into videos table and then list_recent_videos
     with db.connect(db_path) as con:
@@ -33,6 +35,14 @@ def test_db_init_and_costs(tmp_path):
     assert any(v["video_id"] == "vid1" for v in recent)
 
     # test prompt assignments upsert/get
-    db.upsert_prompt_assignment(db_path, ts, "channel_x", "vid1", "base", variant_manifest_rel="m.json", notes="n")
+    db.upsert_prompt_assignment(
+        db_path,
+        ts,
+        "channel_x",
+        "vid1",
+        "base",
+        variant_manifest_rel="m.json",
+        notes="n",
+    )
     arm = db.get_prompt_assignment(db_path, "channel_x", "vid1")
     assert arm == "base"

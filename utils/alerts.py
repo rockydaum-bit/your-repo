@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from utils.db import insert_alert, fetch_recent_alerts
-from utils.paths import EnginePaths
+
 
 @dataclass(frozen=True)
 class Alert:
@@ -19,8 +19,10 @@ class Alert:
     message: str
     meta: Optional[Dict[str, Any]]
 
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
 
 def raise_alert(
     db_path: str,
@@ -50,6 +52,7 @@ def raise_alert(
         message=message,
         meta_json=meta_json,
     )
+
 
 def get_recent_alerts(
     db_path: str,

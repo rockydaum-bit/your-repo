@@ -4,6 +4,7 @@ import shutil
 import psutil
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class HardwareStatus:
     cpu_pct: float
@@ -11,7 +12,10 @@ class HardwareStatus:
     should_pause: bool
     reasons: list[str]
 
-def check_hardware(engine_root: str, cpu_pause_pct: float, disk_free_pause_pct: float) -> HardwareStatus:
+
+def check_hardware(
+    engine_root: str, cpu_pause_pct: float, disk_free_pause_pct: float
+) -> HardwareStatus:
     cpu = psutil.cpu_percent(interval=1.0)
     total, used, free = shutil.disk_usage(engine_root)
     disk_free_pct = (free / total) * 100.0

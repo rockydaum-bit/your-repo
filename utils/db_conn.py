@@ -7,8 +7,11 @@ import sqlite3
 from config import EngineConfig
 from utils.paths import EnginePaths
 
+
 @contextmanager
-def get_db_connection(cfg: EngineConfig, paths: EnginePaths) -> Iterator[sqlite3.Connection]:
+def get_db_connection(
+    cfg: EngineConfig, paths: EnginePaths
+) -> Iterator[sqlite3.Connection]:
     """Return a DB connection according to the configured driver.
 
     Today this supports SQLite only. Callers should use this context manager

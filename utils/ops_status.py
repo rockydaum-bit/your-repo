@@ -4,17 +4,22 @@ from typing import Any, Dict, List
 from utils.json_validate import save_json
 from utils.alerts import get_recent_alerts
 from utils.db_conn import get_db_connection
+
+
 def _compute_overall_status(latest_alerts: list[dict[str, Any]]) -> str:
     """
     Map recent alerts to a coarse health status.
     Priority: error > warning > ok.
     """
-    severities = {a["severity"] if isinstance(a, dict) else a.severity for a in latest_alerts}
+    severities = {
+        a["severity"] if isinstance(a, dict) else a.severity for a in latest_alerts
+    }
     if "error" in severities:
         return "failing"
     if "warning" in severities:
         return "degraded"
     return "ok"
+
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -42,7 +47,7 @@ def generate_channel_status(cfg, paths, channel_id: str) -> Dict[str, Any]:
 
         # Publish stats
         row = con.execute(
-        """
+            """
         SELECT
           COUNT(*) as total,
           SUM(CASE WHEN status='published' THEN 1 ELSE 0 END) as published,
@@ -50,21 +55,21 @@ def generate_channel_status(cfg, paths, channel_id: str) -> Dict[str, Any]:
         FROM videos
         WHERE channel_id = ?
         """,
-        (channel_id,),
-    ).fetchone()
+            (channel_id,),
+        ).fetchone()
         status["publish"] = dict(row) if row else {}
 
         # Last published video
         row2 = con.execute(
-        """
+            """
         SELECT video_id, run_id, youtube_video_id, published_ts, status
         FROM videos
         WHERE channel_id = ?
         ORDER BY published_ts DESC
         LIMIT 1
         """,
-        (channel_id,),
-    ).fetchone()
+            (channel_id,),
+        ).fetchone()
         status["publish"]["last"] = dict(row2) if row2 else None
 
         # Recent events
@@ -96,7 +101,9 @@ def generate_channel_status(cfg, paths, channel_id: str) -> Dict[str, Any]:
         status["overall_status"] = _compute_overall_status(latest_alerts)
 
     # Write channel-scoped artifact
-    out_dir = os.path.join(cfg.engine_root, "assets", "channels", channel_id, "pipeline", "ops")
+    out_dir = os.path.join(
+        cfg.engine_root, "assets", "channels", channel_id, "pipeline", "ops"
+    )
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "status.json")
     save_json(out_path, status)
