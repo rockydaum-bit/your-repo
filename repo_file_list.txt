@@ -69,6 +69,7 @@ rpds/rpds.py
 run_api.py
 scripts/build_all.ps1
 scripts/build_exe.ps1
+scripts/commit_and_verify_inventory.ps1
 scripts/commit_repo_inventory.ps1
 scripts/create_and_push_branch.ps1
 scripts/generate_repo_inventory.ps1

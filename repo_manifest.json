@@ -355,6 +355,11 @@
         "sha256":  "A287E12F08239DEB8970D933F71DB80D38484596F9B434DF8FE063E39AE4C124"
     },
     {
+        "path":  "scripts/commit_and_verify_inventory.ps1",
+        "size":  886,
+        "sha256":  "8F37B4DD52E2561CD5DCEB6210A9444C1932B539287A6748A6E140C002088886"
+    },
+    {
         "path":  "scripts/commit_repo_inventory.ps1",
         "size":  3731,
         "sha256":  "CB2C5597BBD58A204C54A84A8833843E1C33B93FA3B2F989E236F072DDC0325A"
