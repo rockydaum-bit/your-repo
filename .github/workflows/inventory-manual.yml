@@ -1,0 +1,25 @@
+name: Inventory — Manual verify
+
+on:
+  workflow_dispatch: {}
+
+permissions: read-all
+
+jobs:
+  verify-inventory:
+    name: Verify repo inventory (manual)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run inventory helper (no push)
+        env:
+          SKIP_PUSH: 'true'
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\commit_and_verify_inventory.ps1

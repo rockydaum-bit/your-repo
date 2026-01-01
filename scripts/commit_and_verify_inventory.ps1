@@ -25,7 +25,11 @@ git --no-pager diff --cached -- repo_file_list.txt repo_manifest.json
 
 Write-Output "`n=== 4) COMMIT + PUSH ==="
 git commit -m "chore: refresh repo inventory outputs"
-git push
+if ($env:SKIP_PUSH -or $env:CI_SKIP_PUSH) {
+	Write-Output "SKIP_PUSH is set; skipping git push (CI/manual-safe mode)."
+} else {
+	git push
+}
 
 Write-Output "`n=== 5) RE-RUN GENERATOR (must be deterministic) ==="
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\generate_repo_inventory.ps1
