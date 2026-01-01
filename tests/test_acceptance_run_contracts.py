@@ -302,7 +302,6 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
 
     artifacts_run1 = None
     artifacts_run2 = None
-    summary_run1 = None
     summary_run2 = None
     hashes_run1 = None
     hashes_run2 = None
