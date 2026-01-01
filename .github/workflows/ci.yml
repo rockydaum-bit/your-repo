@@ -52,3 +52,36 @@ jobs:
           echo "Enforcing coverage threshold: ${THRESH}%"
           python -m pip install --upgrade coverage
           coverage report --fail-under=${THRESH}
+
+  inventory_guardrail:
+    name: Inventory guardrail (determinism + contract)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps (minimal for guardrail)
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path -LiteralPath ".\requirements.txt") {
+            python -m pip install -r .\requirements.txt
+          }
+          python -m pip install pytest
+
+      - name: Regenerate inventory + verify no diff
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\generate_repo_inventory.ps1
+          git --no-pager diff -- repo_file_list.txt repo_manifest.json
+          git diff --exit-code -- repo_file_list.txt repo_manifest.json
+
+      - name: Run inventory contract guardrail test
+        shell: pwsh
+        run: |
+          python -m pytest -q tests/test_repo_inventory_manifest.py
