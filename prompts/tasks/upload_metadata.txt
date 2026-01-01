@@ -1,0 +1,15 @@
+INPUT:
+Selected title + description + tags + chapters + affiliate plan.
+
+TASK:
+Generate upload package:
+- final title
+- description
+- tags
+- chapters (timestamped)
+- pinned comment
+- end screen CTA
+- scheduled publish datetime (based on provided timezone window)
+
+OUTPUT:
+Return JSON matching metadata.schema.json.

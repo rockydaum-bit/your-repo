@@ -1,0 +1,19 @@
+INPUT:
+You are given a channel profile, a niche, constraints, and the next publishing window.
+
+TASK:
+Generate a 4-week content plan (3 videos/week) including:
+- video_id (deterministic)
+- topic
+- angle
+- target viewer persona
+- hook concept
+- affiliate intent (high/medium/low)
+- expected RPM band (low/med/high)
+
+CONSTRAINTS:
+- Must match channel voice and policy constraints.
+- Prefer evergreen + buyer intent topics.
+
+OUTPUT:
+Return JSON matching content_plan.schema.json.

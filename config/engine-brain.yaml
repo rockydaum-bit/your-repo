@@ -1,0 +1,37 @@
+version: "0.3.0-closed-loop-autonomy"
+role: "brain"
+mode: "production"
+
+engine_root: "D:/textautonomous_media_engine"
+
+db:
+  driver: "sqlite"
+  path: "D:/textautonomous_media_engine/data/revenue.db"
+
+storage:
+  mode: "local"          # future: "nas"
+  local_root: "D:/textautonomous_media_engine"
+  nas_root: ""           # fill when NAS exists
+
+network:
+  host: "0.0.0.0"
+  port: 8000
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  # api_key is read from env: OPENAI_API_KEY
+
+ab_testing:
+  enable_auto_promote: false
+  min_videos: 6
+  min_days: 7
+
+feature_flags:
+  enable_voice: true
+  enable_youtube_publish: true
+
+channels:
+  - id: "channel_001_ai_tools"
+    name: "AI Tools"
+    platform: "youtube"

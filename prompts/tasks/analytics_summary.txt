@@ -1,0 +1,13 @@
+INPUT:
+Last 7/28 days analytics rollup + video-level metrics.
+
+TASK:
+Return:
+- KPI deltas
+- anomalies
+- root cause hypotheses
+- top 3 experiments
+- measurement plan
+
+OUTPUT:
+Return JSON matching analytics_rollup.schema.json.

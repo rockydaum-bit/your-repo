@@ -1,0 +1,14 @@
+{
+  "channel_id": "channel_001_ai_tools",
+  "video_id": "channel_001_ai_tools_video01",
+  "titles": ["Test Video"],
+  "selected_title": "Test Video",
+  "description": "Description",
+  "tags": ["test"],
+  "chapters": [{"timestamp": "00:00", "title": "Intro"}],
+  "hashtags": ["#test"],
+  "affiliate_plan": {"disclosure": "none", "placements": [{"timestamp": "00:30", "script_snippet": "Buy now", "offer_id": "o1", "cta_copy": "Click"}], "tools_section": "tools"},
+  "pinned_comment": null,
+  "thumbnail_briefs": [{"concept": "face", "overlay_text": "Try this", "composition_notes": "closeup", "dont_do": []}],
+  "missing_data": []
+}

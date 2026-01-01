@@ -1,0 +1,16 @@
+INPUT:
+Final script + available asset sources.
+
+TASK:
+Create storyboard with:
+- scene_id
+- time range
+- on-screen text
+- suggested b-roll keywords
+- motion/transition type
+- whether captions required
+
+Keep it efficient for local rendering.
+
+OUTPUT:
+Return JSON matching storyboard.schema.json.

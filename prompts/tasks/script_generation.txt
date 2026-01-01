@@ -1,0 +1,18 @@
+INPUT:
+Channel profile + a single selected topic plan item.
+
+TASK:
+Write a 10–18 minute script optimized for retention:
+- 0:00–0:15 cold open hook
+- 0:15–1:00 credibility + promise
+- Clear sections with timestamps
+- Pattern interrupt every ~120 seconds (story, example, counterintuitive insight, checklist)
+- End with CTA + next video tease
+
+RULES:
+- No fluff.
+- Use short sentences.
+- Avoid banned claims; include disclaimers if regulated niche.
+
+OUTPUT:
+Return JSON matching script.schema.json.

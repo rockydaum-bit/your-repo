@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "required": ["channel_id", "video_id", "titles", "selected_title", "description", "tags", "chapters", "hashtags", "affiliate_plan", "pinned_comment", "thumbnail_briefs", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "video_id": { "type": "string" },
+    "titles": { "type": "array", "items": { "type": "string" } },
+    "selected_title": { "type": ["string", "null"] },
+    "description": { "type": ["string", "null"] },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "title"],
+        "properties": {
+          "timestamp": { "type": "string" },
+          "title": { "type": "string" }
+        }
+      }
+    },
+    "hashtags": { "type": "array", "items": { "type": "string" } },
+    "affiliate_plan": {
+      "type": "object",
+      "required": ["disclosure", "placements", "tools_section"],
+      "properties": {
+        "disclosure": { "type": "string" },
+        "placements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "script_snippet", "offer_id", "cta_copy"],
+            "properties": {
+              "timestamp": { "type": "string" },
+              "script_snippet": { "type": "string" },
+              "offer_id": { "type": "string" },
+              "cta_copy": { "type": "string" }
+            }
+          }
+        },
+        "tools_section": { "type": "string" }
+      }
+    },
+    "pinned_comment": { "type": ["string", "null"] },
+    "thumbnail_briefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["concept", "overlay_text", "composition_notes", "dont_do"],
+        "properties": {
+          "concept": { "type": "string" },
+          "overlay_text": { "type": "string" },
+          "composition_notes": { "type": "string" },
+          "dont_do": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

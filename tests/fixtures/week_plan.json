@@ -1,0 +1,21 @@
+{
+  "channel_id": "channel_001_ai_tools",
+  "timezone": "UTC",
+  "week_plans": [
+    {
+      "week_number": 1,
+      "videos": [
+        {
+          "video_id": "channel_001_ai_tools_video01",
+          "topic": "test",
+          "angle": "",
+          "persona": "SMB owner",
+          "hook": "Quick hook",
+          "affiliate_intent": "high",
+          "expected_rpm_band": "high"
+        }
+      ]
+    }
+  ],
+  "missing_data": []
+}

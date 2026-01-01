@@ -1,0 +1,84 @@
+# config/engine.yaml
+# Local-first defaults. Edit to enable other modes/features.
+
+engine_root: .
+mode: local           # local | single_node | distributed
+role: brain           # brain | worker
+
+server:
+  host: 127.0.0.1
+  port: 8000
+
+brain:
+  base_url: "http://127.0.0.1:8000"
+  worker_poll_interval_sec: 10
+
+worker:
+  id: "worker-${HOSTNAME}"
+  capabilities:
+    - run_channel
+    - score_channel
+
+# DB configuration (safe defaults: sqlite local file)
+db:
+  driver: sqlite          # sqlite | postgres
+  url: data/revenue.db
+
+# Storage abstraction
+storage:
+  mode: local             # local | nas | object
+  local_root: .
+  nas_root: null          # e.g. "\\\\NAS01\\media_engine" when using NAS
+  object_base_url: null   # e.g. "s3://media-bucket/"
+
+# Platforms and per-platform config
+platforms:
+  enabled:
+    - youtube
+  youtube:
+    client_secrets_path: ""
+    token_path: ""
+  tiktok:
+    enabled: false
+    api_key: null
+  instagram:
+    enabled: false
+    api_key: null
+
+# AI provider configuration
+ai:
+  default_provider: openai    # openai | local
+  providers:
+    openai:
+      api_key: "${OPENAI_API_KEY}"
+      model: gpt-4o
+    local:
+      base_url: "http://localhost:9000"
+      api_key: null
+
+# AB testing / autopromotion
+ab_testing:
+  enable_auto_promote: false
+  auto_promote_min_videos: 6
+  auto_promote_min_days: 7
+  scoring_window_days: 7
+
+# Analytics sources & models
+analytics:
+  sources:
+    - youtube
+  youtube:
+    enabled: true
+
+# List of channels (id + friendly name)
+channels:
+  - id: "channel_001_ai_tools"
+    name: "AI Tools"
+
+# Feature flags / advanced knobs
+features:
+  enable_metrics_rollup: true
+  enable_instrumentation: false
+
+# Version for the instance (can be replaced during build)
+version: "0.0.0-local"

@@ -1,0 +1,31 @@
+version: "0.3.0-closed-loop-autonomy"
+role: "worker"
+mode: "production"
+
+engine_root: "D:/textautonomous_media_engine/data/prod"
+
+db:
+  driver: "sqlite"
+  path: "D:/textautonomous_media_engine/data/prod/revenue.db"
+
+storage:
+  mode: "local"
+  local_root: "D:/textautonomous_media_engine/data/prod"
+  nas_root: ""
+
+worker:
+  queue_poll_interval_seconds: 30
+  id: "worker-prod-01"
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+
+# Do NOT store secrets here. Set OPENAI_API_KEY in environment or use secure vault.
+
+youtube:
+  client_secrets_path: "D:/textautonomous_media_engine/config/yt_client_secrets.json"
+  token_path: "D:/textautonomous_media_engine/config/yt_token.json"
+
+feature_flags:
+  enable_youtube_publish: false

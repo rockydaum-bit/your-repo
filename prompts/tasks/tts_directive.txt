@@ -1,0 +1,12 @@
+INPUT:
+Final script.
+
+TASK:
+Return narration_chunks (30–60 seconds each), with:
+- pacing per chunk (slow/medium/fast)
+- emphasis words
+- pronunciation dictionary
+- breath/pause markers
+
+OUTPUT:
+Return JSON matching script.schema.json (narration fields populated).

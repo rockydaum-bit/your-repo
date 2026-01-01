@@ -1,0 +1,31 @@
+version: "0.3.0-closed-loop-autonomy"
+role: "worker"
+mode: "production"
+
+engine_root: "D:/textautonomous_media_engine"
+
+db:
+  driver: "sqlite"
+  path: "D:/textautonomous_media_engine/data/revenue.db"  # shared DB (or later: central DB)
+
+storage:
+  mode: "local"              # later: "nas"
+  local_root: "D:/textautonomous_media_engine"
+  nas_root: ""               # fill when NAS available
+
+worker:
+  queue_poll_interval_seconds: 30
+
+ai:
+  provider: "openai"
+  model: "gpt-4o-mini"
+
+# Local-only test keys to satisfy preflight for worker mode (safe dummy values)
+openai_api_key: "dummy"
+
+youtube:
+  client_secrets_path: "D:/textautonomous_media_engine/config/yt_client_secrets.json"
+  token_path: "D:/textautonomous_media_engine/config/yt_token.json"
+
+feature_flags:
+  enable_youtube_publish: false     # workers typically don’t publish, just produce assets

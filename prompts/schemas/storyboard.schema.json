@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": ["channel_id", "video_id", "scenes", "export_preset", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "video_id": { "type": "string" },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scene_id", "time_start", "time_end", "onscreen_text", "broll_keywords", "motion", "captions"],
+        "properties": {
+          "scene_id": { "type": "string" },
+          "time_start": { "type": "string" },
+          "time_end": { "type": "string" },
+          "onscreen_text": { "type": "string" },
+          "broll_keywords": { "type": "array", "items": { "type": "string" } },
+          "motion": { "type": "string" },
+          "captions": { "type": "boolean" }
+        }
+      }
+    },
+    "export_preset": {
+      "type": "object",
+      "required": ["resolution", "fps", "codec", "bitrate_mbps"],
+      "properties": {
+        "resolution": { "type": "string" },
+        "fps": { "type": "integer" },
+        "codec": { "type": "string" },
+        "bitrate_mbps": { "type": "integer" }
+      }
+    },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

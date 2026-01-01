@@ -1,0 +1,57 @@
+name: Coverage Ratchet
+
+# Scheduled workflow to propose incremental increases to coverage threshold
+on:
+  schedule:
+    # every 2 weeks at 00:00 UTC
+    - cron: '0 0 */14 * *'
+  workflow_dispatch: {}
+
+jobs:
+  ratchet:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read current threshold
+        id: read
+        run: |
+          if [ ! -f .coverage_threshold ]; then echo "55" > .coverage_threshold; fi
+          CURRENT=$(cat .coverage_threshold | tr -d " \n\r")
+          echo "current=${CURRENT}" >> $GITHUB_OUTPUT
+
+      - name: Compute new threshold
+        id: compute
+        run: |
+          CUR=${{ steps.read.outputs.current }}
+          NEW=$CUR
+          if [ "$CUR" -lt 80 ]; then
+            NEW=$((CUR + 5))
+            if [ "$NEW" -gt 80 ]; then NEW=80; fi
+          fi
+          echo "new=${NEW}" >> $GITHUB_OUTPUT
+
+      - name: Create PR to bump threshold (if changed)
+        uses: peter-evans/create-pull-request@v4
+        if: steps.compute.outputs.new != steps.read.outputs.current
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: chore(ci): bump coverage threshold to ${{ steps.compute.outputs.new }}%
+          branch: coverage/bump-threshold-${{ steps.compute.outputs.new }}
+          title: chore(ci): bump coverage threshold to ${{ steps.compute.outputs.new }}%
+          body: |
+            This PR was created automatically to increment the coverage threshold to ${{ steps.compute.outputs.new }}% as part of the gradual coverage ratchet.
+
+            The policy is to increase by 5% every 2 weeks until 80% is reached.
+          labels: automated,coverage
+          path: .
+          # Files to update: overwrite .coverage_threshold with new value
+          files: |
+            .coverage_threshold
+          file-content: |
+            ${{ steps.compute.outputs.new }}

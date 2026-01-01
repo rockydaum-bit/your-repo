@@ -1,0 +1,12 @@
+INPUT:
+Final script + topic.
+
+TASK:
+Generate 12 titles:
+- 4 “How to”
+- 4 “Best tools”
+- 4 “X vs Y”
+Each title must be <= 70 characters, high intent, no clickbait.
+
+OUTPUT:
+Return JSON matching metadata.schema.json (titles only fields populated).

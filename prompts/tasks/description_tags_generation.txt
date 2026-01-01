@@ -1,0 +1,12 @@
+INPUT:
+Final script + selected title + channel profile.
+
+TASK:
+Generate:
+- SEO description (first 200 chars must contain main keyword)
+- Long description with sections and affiliate disclosures
+- 15–25 tags
+- 8–12 hashtags (optional)
+
+OUTPUT:
+Return JSON matching metadata.schema.json.

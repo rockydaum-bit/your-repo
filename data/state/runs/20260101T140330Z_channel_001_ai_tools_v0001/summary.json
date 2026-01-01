@@ -1,0 +1,27 @@
+{
+  "run_id": "20260101T140330Z_channel_001_ai_tools_v0001",
+  "channel_id": "channel_001_ai_tools",
+  "started_at": "2026-01-01T14:03:30Z",
+  "finished_at": "2026-01-01T14:03:32Z",
+  "status": "failed",
+  "steps": {
+    "plan": "failed",
+    "script": "failed",
+    "tts": "failed",
+    "storyboard": "failed",
+    "metadata": "success"
+  },
+  "artifacts": {
+    "plan": ".\\assets\\channels\\channel_001_ai_tools\\pipeline\\plans\\video01_plan.json",
+    "script": ".\\assets\\channels\\channel_001_ai_tools\\pipeline\\scripts\\video01_script.json",
+    "tts": ".\\assets\\channels\\channel_001_ai_tools\\pipeline\\scripts\\video01_script.json",
+    "storyboard": ".\\assets\\channels\\channel_001_ai_tools\\pipeline\\video\\video01_storyboard.json",
+    "metadata": ".\\assets\\channels\\channel_001_ai_tools\\pipeline\\publish\\video01_metadata.json"
+  },
+  "errors": [
+    "Error code: 401 - {'error': {'message': 'Incorrect API key provided: test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+    "[Errno 2] No such file or directory: '.\\\\assets\\\\channels\\\\channel_001_ai_tools\\\\pipeline\\\\plans\\\\video01_plan.json'",
+    "[Errno 2] No such file or directory: '.\\\\assets\\\\channels\\\\channel_001_ai_tools\\\\pipeline\\\\scripts\\\\video01_script.json'",
+    "[Errno 2] No such file or directory: '.\\\\assets\\\\channels\\\\channel_001_ai_tools\\\\pipeline\\\\scripts\\\\video01_script.json'"
+  ]
+}

@@ -1,0 +1,14 @@
+INPUT:
+Analytics rollup + costs + channel plan.
+
+TASK:
+Return optimization plan:
+- prompt adjustments
+- topic pivots
+- schedule changes
+- scaling recommendations
+- budget actions (increase/hold/decrease)
+Each must include expected impact, cost, risk, and measurement plan.
+
+OUTPUT:
+Return JSON matching optimization_plan.schema.json.

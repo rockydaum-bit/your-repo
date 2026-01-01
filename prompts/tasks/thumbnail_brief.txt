@@ -1,0 +1,12 @@
+INPUT:
+Selected title + hook + key promise.
+
+TASK:
+Produce thumbnail brief:
+- 3 concepts
+- 3 short text overlays (<= 4 words)
+- visual composition notes
+- “do not do” list (clickbait, clutter)
+
+OUTPUT:
+Return JSON matching metadata.schema.json (thumbnail fields populated).

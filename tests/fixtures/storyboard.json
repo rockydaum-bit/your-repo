@@ -1,0 +1,9 @@
+{
+  "channel_id": "channel_001_ai_tools",
+  "video_id": "channel_001_ai_tools_video01",
+  "scenes": [
+    {"scene_id": "s1", "time_start": "00:00", "time_end": "00:10", "onscreen_text": "Hello", "broll_keywords": ["office"], "motion": "pan", "captions": false}
+  ],
+  "export_preset": {"resolution": "1920x1080", "fps": 30, "codec": "h264", "bitrate_mbps": 8},
+  "missing_data": []
+}

@@ -1,0 +1,19 @@
+INPUT:
+You receive two analytics rollups (7d and 28d), plus the current base prompts (task prompt text), plus governance constraints.
+
+TASK:
+Create a prompt-variant plan that improves retention + RPM with minimal risk.
+You MUST output JSON matching the provided schema. Do not output prose.
+
+RULES:
+- Only create bounded patch operations on EXISTING prompts:
+  - append, insert_after(marker), replace(old,new)
+- Keep patches small and surgical (<= 6 operations total across all files).
+- Each patch must have a clear hypothesis and a measurement plan.
+- Prioritize early retention:
+  - denser hook in first 15s
+  - earlier payoff
+  - reduce filler, increase checklists
+- Include an A/B test plan:
+  - 50/50 allocation for next 6 videos
+  - success metric: +10% AVD or +15% first-30s retention proxy (if available) or +10% RPM

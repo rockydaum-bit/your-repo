@@ -1,0 +1,15 @@
+{
+  "channel_id": "channel_001_ai_tools",
+  "video_id": "channel_001_ai_tools_video01",
+  "title_working": "Test Video",
+  "runtime_target_min": 1,
+  "sections": [
+    {"timestamp_start": "00:00", "heading": "Intro", "summary": "Intro summary"}
+  ],
+  "full_script": "Full script text",
+  "narration_chunks": [
+    {"chunk_id": "c1", "text": "Hello world", "pacing": "medium", "emphasis": [], "pauses_ms": [], "pronunciations": []}
+  ],
+  "disclaimers": [],
+  "missing_data": []
+}

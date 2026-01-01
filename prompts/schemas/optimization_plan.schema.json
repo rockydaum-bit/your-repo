@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "required": ["channel_id", "recommendations", "scale_actions", "budget_actions", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "action", "expected_impact", "cost_usd", "risk", "measurement_plan"],
+        "properties": {
+          "category": { "type": "string" },
+          "action": { "type": "string" },
+          "expected_impact": { "type": "string" },
+          "cost_usd": { "type": ["number", "null"] },
+          "risk": { "type": "string", "enum": ["low", "medium", "high"] },
+          "measurement_plan": { "type": "string" }
+        }
+      }
+    },
+    "scale_actions": { "type": "array", "items": { "type": "string" } },
+    "budget_actions": { "type": "array", "items": { "type": "string" } },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

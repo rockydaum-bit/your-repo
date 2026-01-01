@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "required": ["channel_id", "variant_name", "notes", "patches", "ab_test", "recommendations", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "variant_name": { "type": "string" },
+    "notes": { "type": "string" },
+    "patches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target_rel_path", "operations", "hypothesis", "measurement_plan"],
+        "properties": {
+          "target_rel_path": { "type": "string" },
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["op"],
+              "properties": {
+                "op": { "type": "string", "enum": ["append", "insert_after", "replace"] },
+                "text": { "type": "string" },
+                "marker": { "type": "string" },
+                "old": { "type": "string" },
+                "new": { "type": "string" }
+              }
+            }
+          },
+          "hypothesis": { "type": "string" },
+          "measurement_plan": { "type": "string" }
+        }
+      }
+    },
+    "ab_test": {
+      "type": "object",
+      "required": ["enabled", "allocation", "videos", "success_metrics"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "allocation": { "type": "object", "additionalProperties": { "type": "number" } },
+        "videos": { "type": "integer" },
+        "success_metrics": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "recommendations": { "type": "array", "items": { "type": "string" } },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

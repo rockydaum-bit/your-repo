@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "required": ["channel_id", "video_id", "title_working", "runtime_target_min", "sections", "full_script", "narration_chunks", "disclaimers", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "video_id": { "type": "string" },
+    "title_working": { "type": "string" },
+    "runtime_target_min": { "type": "number" },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp_start", "heading", "summary"],
+        "properties": {
+          "timestamp_start": { "type": "string" },
+          "heading": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "full_script": { "type": "string" },
+    "narration_chunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["chunk_id", "text", "pacing", "emphasis", "pauses_ms", "pronunciations"],
+        "properties": {
+          "chunk_id": { "type": "string" },
+          "text": { "type": "string" },
+          "pacing": { "type": "string", "enum": ["slow", "medium", "fast"] },
+          "emphasis": { "type": "array", "items": { "type": "string" } },
+          "pauses_ms": { "type": "array", "items": { "type": "integer" } },
+          "pronunciations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["term", "say_as"],
+              "properties": {
+                "term": { "type": "string" },
+                "say_as": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "disclaimers": { "type": "array", "items": { "type": "string" } },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

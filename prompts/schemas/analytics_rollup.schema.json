@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "required": ["channel_id", "window_days", "kpis", "anomalies", "experiments", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "window_days": { "type": "integer" },
+    "kpis": {
+      "type": "object",
+      "required": ["views", "watch_time_hours", "ctr", "avg_view_duration_sec", "rpm", "subs_net", "costs_usd", "revenue_usd"],
+      "properties": {
+        "views": { "type": ["number", "null"] },
+        "watch_time_hours": { "type": ["number", "null"] },
+        "ctr": { "type": ["number", "null"] },
+        "avg_view_duration_sec": { "type": ["number", "null"] },
+        "rpm": { "type": ["number", "null"] },
+        "subs_net": { "type": ["number", "null"] },
+        "costs_usd": { "type": ["number", "null"] },
+        "revenue_usd": { "type": ["number", "null"] }
+      }
+    },
+    "anomalies": { "type": "array", "items": { "type": "string" } },
+    "experiments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["hypothesis", "change", "metric", "success_threshold"],
+        "properties": {
+          "hypothesis": { "type": "string" },
+          "change": { "type": "string" },
+          "metric": { "type": "string" },
+          "success_threshold": { "type": "string" }
+        }
+      }
+    },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

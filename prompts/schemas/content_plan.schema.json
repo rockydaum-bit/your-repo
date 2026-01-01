@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": ["channel_id", "timezone", "week_plans", "missing_data"],
+  "properties": {
+    "channel_id": { "type": "string" },
+    "timezone": { "type": "string" },
+    "week_plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["week_number", "videos"],
+        "properties": {
+          "week_number": { "type": "integer" },
+          "videos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["video_id", "topic", "angle", "persona", "hook", "affiliate_intent", "expected_rpm_band"],
+              "properties": {
+                "video_id": { "type": "string" },
+                "topic": { "type": "string" },
+                "angle": { "type": "string" },
+                "persona": { "type": "string" },
+                "hook": { "type": "string" },
+                "affiliate_intent": { "type": "string", "enum": ["low", "medium", "high"] },
+                "expected_rpm_band": { "type": "string", "enum": ["low", "medium", "high"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "missing_data": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,16 @@
+INPUT:
+Script + affiliates.json (approved offers).
+
+TASK:
+Create affiliate placement plan:
+- Where in script to mention (time + sentence)
+- Which offer
+- Disclosure text
+- Pinned comment copy
+- “Tools mentioned” section formatting
+
+CONSTRAINT:
+No misleading claims. Keep it ethical and compliant.
+
+OUTPUT:
+Return JSON matching metadata.schema.json (affiliate fields populated).
