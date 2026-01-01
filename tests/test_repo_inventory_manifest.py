@@ -15,6 +15,8 @@ EXCLUDED_DIRS = [
     ".pytest_cache",
     ".mypy_cache",
     "node_modules",
+    ".venv",
+    ".git",
 ]
 EXCLUDED_PATH_FRAGMENTS = [
     "data/logs",
@@ -134,6 +136,10 @@ def test_exclusions_not_present_in_manifest():
                 pytest.fail(f"Excluded path fragment '{frag}' matched by manifest path (startswith): '{path}'")
             if re.search(r'(^|/)' + re.escape(frag_norm) + r'(/|$)', path, flags=re.IGNORECASE):
                 pytest.fail(f"Excluded path fragment '{frag}' found in manifest path (segment match): '{path}'")
+
+        # repo-root run_tests_*.log files
+        if re.match(r'^run_tests_.*\.log$', path):
+            pytest.fail(f"Excluded repo-root log file matched by manifest path: '{path}'")
 
 
 def test_repo_file_list_matches_manifest_exactly():

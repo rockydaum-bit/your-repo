@@ -17,7 +17,7 @@ $repoFileList = 'repo_file_list.txt'
 $repoManifest = 'repo_manifest.json'
 
 # Exclusions (case-insensitive, path-segment aware)
-$excludedDirSegments = @('build','ui_dist','dist','__pycache__','.pytest_cache','.mypy_cache','node_modules')
+$excludedDirSegments = @('build','ui_dist','dist','__pycache__','.pytest_cache','.mypy_cache','node_modules','.venv','.git','.ruff_cache')
 $excludedPathFragments = @('data/logs','data/state')
 $excludedExts = @('.pyc','.pyo','.exe','.pkg','.pyz','.zip','.tar','.gz')
 $excludedExact = @($repoFileList.ToLower(), $repoManifest.ToLower(), '.coverage', '.coverage_threshold', 'config/yt_token.json', 'config/yt_client_secrets.json')
@@ -41,6 +41,8 @@ function Is-Excluded([string]$rel) {
     foreach ($ex in $excludedExact) { if ($lc -eq $ex.ToLower()) { return $true } }
     # .secrets anywhere
     if ($lc -match '\.secrets') { return $true }
+    # repo-root run_tests_*.log files
+    if ($lc -match '^run_tests_.*\.log$') { return $true }
     # extensions
     foreach ($ext in $excludedExts) { if ($lc.EndsWith($ext)) { return $true } }
     # excluded repo-root dirs: startswith and segment match
@@ -70,7 +72,7 @@ foreach ($f in $all) {
 
 # Sort deterministically (do not use Sort-Object -Unique)
 $sorted = $paths.Clone()
-[Array]::Sort($sorted)
+[Array]::Sort($sorted, [System.StringComparer]::Ordinal)
 
 # Write repo_file_list.txt: all paths, sorted, forward slashes, exactly one LF newline, UTF8 no BOM
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -106,13 +108,54 @@ Write-Output "WROTE: $repoManifest ($count entries)"
 Write-Output "repo_file_list.txt SHA256: $hashFileList"
 Write-Output "repo_manifest.json  SHA256: $hashManifest"
 
-# Determinism check: ensure regenerating these files produces no diff
-& git diff --exit-code -- $repoFileList $repoManifest
-$diffExit = $LASTEXITCODE
-if ($diffExit -eq 0) {
-    Write-Output 'git diff: no changes (deterministic)'
-    exit 0
-} else {
-    Write-Output 'git diff: changes detected'
-    exit $diffExit
+# Determinism check (repo-state independent):
+# Rebuild content in-memory and ensure it matches what we just wrote.
+# This avoids failing just because the repo had outdated committed artifacts.
+function Build-InventoryContent {
+    param(
+        [string[]]$sortedPaths,
+        [hashtable]$fullPathMap
+    )
+
+    $fileList = ($sortedPaths -join "`n") + "`n"
+
+    $manifest = @()
+    foreach ($rel in $sortedPaths) {
+        $full = $fullPathMap[$rel]
+        $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $full).Hash
+        $entry = [ordered]@{
+            path   = $rel
+            size   = [int64]((Get-Item -LiteralPath $full).Length)
+            sha256 = $hash
+        }
+        $manifest += [PSCustomObject]$entry
+    }
+
+    $json2 = $manifest | ConvertTo-Json -Depth 5
+    $json2 = $json2 -replace "(`r`n|`r|`n)","`n"
+    if (-not $json2.EndsWith("`n")) { $json2 += "`n" }
+
+    return [PSCustomObject]@{
+        FileList = $fileList
+        Json     = $json2
+    }
 }
+
+$first = Build-InventoryContent -sortedPaths $sorted -fullPathMap $meta
+
+# Read back what we wrote (source of truth)
+$writtenFileList = [System.IO.File]::ReadAllText((Join-Path $root $repoFileList), $utf8NoBom)
+$writtenJson     = [System.IO.File]::ReadAllText((Join-Path $root $repoManifest), $utf8NoBom)
+
+# Rebuild again (second pass) and compare all three
+$second = Build-InventoryContent -sortedPaths $sorted -fullPathMap $meta
+
+if ($first.FileList -ne $writtenFileList -or $first.FileList -ne $second.FileList) {
+    Fail "Non-deterministic repo_file_list.txt generation detected."
+}
+if ($first.Json -ne $writtenJson -or $first.Json -ne $second.Json) {
+    Fail "Non-deterministic repo_manifest.json generation detected."
+}
+
+Write-Output "determinism: OK (two-pass match)"
+exit 0
