@@ -5,6 +5,11 @@
         "sha256":  "F00ED074755F182DB04C5EB8089F92967C599D9595971108C70A48C54BF7078C"
     },
     {
+        "path":  ".gitattributes",
+        "size":  307,
+        "sha256":  "1209F7FA05271A58888EC5906F868E6851448E3DB88E426A9E597436ACEE007A"
+    },
+    {
         "path":  ".github/PULL_REQUEST_TEMPLATE/pr_template.md",
         "size":  5500,
         "sha256":  "D12D143E4727CC09285647A2641462B375D93E1997B3629787AE675C4EB5BB82"
@@ -403,11 +408,6 @@
         "path":  "scripts/run_tests_local.ps1",
         "size":  1235,
         "sha256":  "403316581E577D394263DE25CDC9B8B70C0FC42A902555248F466B674D3BA7AF"
-    },
-    {
-        "path":  "scripts/run_tests_wrapped.ps1",
-        "size":  287,
-        "sha256":  "1EB57F1148833FC08D8CC94F4156411C44710CBD54FACB1D2C2D5051B9E41E1C"
     },
     {
         "path":  "scripts/run_weekly_growth_loop.py",

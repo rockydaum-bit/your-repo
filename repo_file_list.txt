@@ -1,4 +1,5 @@
 .env.example
+.gitattributes
 .github/PULL_REQUEST_TEMPLATE/pr_template.md
 .github/PULL_REQUEST_TEMPLATE/reviewer_checklist.md
 .github/workflows/acceptance.yml
@@ -79,7 +80,6 @@ scripts/run_daily_analytics.py
 scripts/run_one_video_pipeline.py
 scripts/run_tests.ps1
 scripts/run_tests_local.ps1
-scripts/run_tests_wrapped.ps1
 scripts/run_weekly_growth_loop.py
 scripts/run_weekly_optimization.py
 scripts/scale_workers.py
