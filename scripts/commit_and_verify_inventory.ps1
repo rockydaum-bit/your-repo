@@ -1,3 +1,17 @@
+<#
+Purpose:
+	One-command helper to stage, commit, push, and verify deterministic
+	repo inventory artifacts (`repo_file_list.txt`, `repo_manifest.json`).
+
+Usage:
+	powershell -NoProfile -ExecutionPolicy Bypass -File scripts/commit_and_verify_inventory.ps1
+
+Notes:
+	- Safe to run repeatedly
+	- Produces no logs or additional tracked files
+	- Intended for local verification and CI parity
+#>
+
 cd (git rev-parse --show-toplevel)
 
 Write-Output "=== 1) STATUS (pre) ==="
