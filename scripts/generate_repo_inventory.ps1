@@ -1,7 +1,5 @@
 [CmdletBinding()]
-param(
-    [switch]$Verbose
-)
+param()
 
 function Fail([string]$msg) {
     Write-Error $msg
@@ -64,7 +62,7 @@ $paths = @()
 $meta = @{}
 foreach ($f in $all) {
     $rel = Normalize-RelPath $f.FullName
-    if (Is-Excluded $rel) { if ($Verbose) { Write-Verbose "Excluded: $rel" }; continue }
+    if (Is-Excluded $rel) { Write-Verbose "Excluded: $rel"; continue }
     if ($paths -contains $rel) { Fail "Duplicate normalized path detected: $rel" }
     $paths += $rel
     $meta[$rel] = $f.FullName
@@ -108,4 +106,13 @@ Write-Output "WROTE: $repoManifest ($count entries)"
 Write-Output "repo_file_list.txt SHA256: $hashFileList"
 Write-Output "repo_manifest.json  SHA256: $hashManifest"
 
-exit 0
+# Determinism check: ensure regenerating these files produces no diff
+& git diff --exit-code -- $repoFileList $repoManifest
+$diffExit = $LASTEXITCODE
+if ($diffExit -eq 0) {
+    Write-Output 'git diff: no changes (deterministic)'
+    exit 0
+} else {
+    Write-Output 'git diff: changes detected'
+    exit $diffExit
+}
