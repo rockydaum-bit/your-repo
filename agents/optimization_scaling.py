@@ -187,8 +187,6 @@ def score_ab_test(
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
-    since = (datetime.utcnow() - timedelta(days=lookback_days)).isoformat()
-
     # Pull videos tied to this manifest variants via prompt_assignments
     cur.execute(
         """

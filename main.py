@@ -5,6 +5,10 @@ from utils.paths import EnginePaths
 from agents.orchestrator import Orchestrator
 from agents.optimization_scaling import OptimizationScalingAgent
 from agents.analytics_metrics import AnalyticsMetricsAgent
+import time
+import socket
+import uuid
+from utils.logger import get_logger
 
 
 def _paths(cfg):
@@ -48,7 +52,6 @@ def cmd_run(args) -> int:
         status = "failed"
         raise
     finally:
-        ts_end = datetime.utcnow().isoformat(timespec="seconds") + "Z"
         ra_update_run_end(cfg=cfg, paths=paths, run_id=run_id, status=status)
     return 0
 
@@ -93,7 +96,6 @@ def cmd_measure(args) -> int:
         status = "failed"
         raise
     finally:
-        ts_end = datetime.utcnow().isoformat(timespec="seconds") + "Z"
         ra_update_run_end(cfg=cfg, paths=paths, run_id=run_id, status=status)
     return 0
 
@@ -136,7 +138,6 @@ def cmd_score(args) -> int:
         status = "failed"
         raise
     finally:
-        ts_end = datetime.utcnow().isoformat(timespec="seconds") + "Z"
         ra_update_run_end(cfg=cfg, paths=paths, run_id=run_id, status=status)
     return 0
 
@@ -158,7 +159,7 @@ def cmd_status(args) -> int:
     run_id = (
         f"{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}_status_{uuid.uuid4().hex[:8]}"
     )
-    ts_start = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    # ts_start is not used directly; we only record run start via ra_insert_run_start
     ra_insert_run_start(
         cfg=cfg,
         paths=paths,
@@ -177,7 +178,6 @@ def cmd_status(args) -> int:
         status = "failed"
         raise
     finally:
-        ts_end = datetime.utcnow().isoformat(timespec="seconds") + "Z"
         ra_update_run_end(cfg=cfg, paths=paths, run_id=run_id, status=status)
     return 0
 
@@ -218,10 +218,7 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
-import time
-import socket
-import uuid
-from utils.logger import get_logger
+# moved imports to top of the file
 
 
 def run_worker_loop(cfg, paths) -> None:
@@ -256,7 +253,7 @@ def run_worker_loop(cfg, paths) -> None:
             log.info("Worker heartbeat recorded", extra={"run_id": run_id})
         except Exception:
             try:
-                update_run_end(db_path, run_id, "error")
+                ra_update_run_end(cfg=cfg, paths=paths, run_id=run_id, status="error")
             except Exception:
                 pass
             log.exception("Worker heartbeat failed")

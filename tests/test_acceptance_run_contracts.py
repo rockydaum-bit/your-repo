@@ -330,7 +330,6 @@ def test_two_run_acceptance(tmp_path, monkeypatch):
         sdata = load_json(sfn)
         if i == 0:
             artifacts_run1 = sdata.get("artifacts", {})
-            summary_run1 = sdata
             # compute hashes immediately to avoid later filesystem races
             hashes_run1 = snapshot_hashes(artifacts_run1, stable_keys)
         else:

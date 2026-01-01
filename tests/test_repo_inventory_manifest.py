@@ -49,7 +49,7 @@ def load_manifest():
 def load_filelist():
     assert FILELIST_PATH.exists(), f"File list missing: {FILELIST_PATH}"
     lines = [
-        l.rstrip("\r\n") for l in FILELIST_PATH.read_text(encoding="utf8").splitlines()
+        line.rstrip("\r\n") for line in FILELIST_PATH.read_text(encoding="utf8").splitlines()
     ]
     return lines
 
@@ -187,7 +187,7 @@ def test_repo_file_list_matches_manifest_exactly():
     for idx, line in enumerate(filelist):
         assert line != "", f"repo_file_list.txt contains blank line at index {idx}"
 
-    filelist_norm = [normalize(l) for l in filelist]
+    filelist_norm = [normalize(line) for line in filelist]
 
     assert len(filelist_norm) == len(manifest_paths), (
         f"Length mismatch: repo_file_list.txt has {len(filelist_norm)} lines, manifest has {len(manifest_paths)} entries"

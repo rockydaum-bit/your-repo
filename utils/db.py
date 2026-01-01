@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sqlite3
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Iterator, Any, Dict, List, Optional
 import json
 
 
@@ -78,7 +78,6 @@ CREATE TABLE IF NOT EXISTS alerts (
 """
 
 # --- Alerts Helpers ---
-from typing import Any, Dict, List, Optional
 
 
 def insert_alert(
