@@ -1,0 +1,11 @@
+# Inventory contract artifacts (must be reviewed)
+repo_file_list.txt               @rockydaum-bit
+repo_manifest.json               @rockydaum-bit
+scripts/generate_repo_inventory.ps1  @rockydaum-bit
+tests/test_repo_inventory_manifest.py @rockydaum-bit
+scripts/commit_and_verify_inventory.ps1 @rockydaum-bit
+.gitattributes                   @rockydaum-bit
+
+# CI workflow that enforces the guardrail
+.github/workflows/ci.yml         @rockydaum-bit
+.github/workflows/inventory-manual.yml @rockydaum-bit
